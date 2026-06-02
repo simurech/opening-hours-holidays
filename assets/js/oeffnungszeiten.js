@@ -9,7 +9,7 @@
         const now = new Date();
         const tz  = (typeof ozData !== 'undefined' && ozData.timezone) ? ozData.timezone : null;
 
-        // Intl API: korrekte Geschäfts-Ortszeit unabhängig vom Standort des Besuchers
+        // Intl API: korrekte Geschäfts-Ortszeit, unabhängig vom Standort des Besuchers
         if (tz && typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
             try {
                 const fmtParts = (opts) =>
@@ -40,6 +40,12 @@
             time:   pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()),
             dayKey: days[d.getUTCDay()]
         };
+    }
+
+    function addDays(dateStr, days) {
+        const d = new Date(dateStr + 'T12:00:00Z');
+        d.setUTCDate(d.getUTCDate() + days);
+        return d.toISOString().slice(0, 10);
     }
 
     function formatZeiten(von1, bis1, von2, bis2) {
@@ -87,7 +93,7 @@
             }
         });
 
-        // [oeffnungszeiten_heute]: Wochentag und Zeiten clientseitig aktualisieren
+        // [oeffnungszeiten_heute]: komplett clientseitig aufbauen — nie falsches anzeigen
         document.querySelectorAll('[data-oz-heute]').forEach(container => {
             const wochentage = (typeof ozData !== 'undefined' && ozData.wochentage) ? ozData.wochentage : {};
             const dayName    = wochentage[now.dayKey] || now.dayKey;
@@ -110,17 +116,57 @@
                 }
             }
 
-            const tagEl = container.querySelector('.oz-heute-tag');
-            if (tagEl) tagEl.textContent = dayName + ':';
+            // Status-Badge retten, dann Container leeren und neu aufbauen
+            const statusBadge = container.querySelector('[data-oz-status]');
+            container.innerHTML = '';
 
-            const zeitenEl = container.querySelector('.oz-heute-zeiten');
-            if (zeitenEl) {
-                zeitenEl.textContent = zeitenText;
-                zeitenEl.classList.toggle('oz-geschlossen', istGeschlossen);
+            const tagEl = document.createElement('span');
+            tagEl.className = 'oz-heute-tag';
+            tagEl.textContent = dayName + ':';
+            container.appendChild(tagEl);
+
+            container.appendChild(document.createTextNode(' '));
+
+            const zeitenEl = document.createElement('span');
+            zeitenEl.className = 'oz-heute-zeiten';
+            if (istGeschlossen) zeitenEl.classList.add('oz-geschlossen');
+            zeitenEl.textContent = zeitenText;
+            container.appendChild(zeitenEl);
+
+            if (bemerkung) {
+                container.appendChild(document.createTextNode(' '));
+                const bemEl = document.createElement('span');
+                bemEl.className = 'oz-heute-bemerkung';
+                bemEl.textContent = '(' + bemerkung + ')';
+                container.appendChild(bemEl);
             }
 
-            const bemerkungEl = container.querySelector('.oz-heute-bemerkung');
-            if (bemerkungEl) bemerkungEl.textContent = bemerkung ? '(' + bemerkung + ')' : '';
+            if (statusBadge) {
+                container.appendChild(document.createTextNode(' '));
+                container.appendChild(statusBadge);
+            }
+        });
+
+        // [oeffnungszeiten_spezial]: Einträge clientseitig nach echtem Datum filtern
+        document.querySelectorAll('[data-oz-spezial]').forEach(container => {
+            const tage    = parseInt(container.dataset.tage  || 30);
+            const limit   = parseInt(container.dataset.limit || -1);
+            const maxDate = addDays(now.date, tage);
+
+            const rows  = Array.from(container.querySelectorAll('tbody tr[data-datum]'));
+            let visible = 0;
+
+            rows.forEach(row => {
+                const d    = row.dataset.datum;
+                const hide = d < now.date || d > maxDate || (limit > 0 && visible >= limit);
+                if (hide) {
+                    row.hidden = true;
+                } else {
+                    visible++;
+                }
+            });
+
+            if (visible === 0) container.hidden = true;
         });
 
         // Status-Badges aktualisieren

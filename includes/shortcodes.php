@@ -225,46 +225,12 @@ function oz_oeffnungszeiten_shortcode($atts) {
 function oz_oeffnungszeiten_heute_shortcode($atts) {
     oz_enqueue_styles();
 
-    $wochentage    = oz_get_wochentage();
-    $zeiten        = oz_get_oeffnungszeiten();
-    $optionen      = oz_get_oeffnungszeiten_optionen();
-    $heute         = current_time('Y-m-d');
-    $wochentag_key = oz_get_wochentag_key(current_time('l'));
-    $wochentag_name = $wochentage[$wochentag_key];
-    $spezial       = oz_get_spezial_fuer_datum($heute);
-
-    $zeiten_text   = '';
-    $bemerkung     = '';
-    $ist_geschlossen = false;
-
-    if ($spezial) {
-        if ($spezial['status'] === 'geschlossen') {
-            $zeiten_text     = 'Geschlossen';
-            $ist_geschlossen = true;
-        } else {
-            $zeiten_text = oz_format_zeiten($spezial['von1'], $spezial['bis1'], $spezial['von2'], $spezial['bis2']);
-        }
-        $bemerkung = $spezial['bemerkung'];
-    } else {
-        $tag = $zeiten[$wochentag_key];
-        if ($tag['offen']) {
-            $zeiten_text = oz_format_zeiten($tag['von1'], $tag['bis1'], $tag['von2'], $tag['bis2']);
-        } else {
-            $zeiten_text     = 'Geschlossen';
-            $ist_geschlossen = true;
-        }
-    }
-
+    $optionen    = oz_get_oeffnungszeiten_optionen();
     $show_status = $optionen['jetzt_offen'];
 
     ob_start();
     ?>
     <div class="oz-oeffnungszeiten-heute" data-oz-heute>
-        <span class="oz-heute-tag"><?php echo esc_html($wochentag_name); ?>:</span>
-        <span class="oz-heute-zeiten <?php echo $ist_geschlossen ? 'oz-geschlossen' : ''; ?>">
-            <?php echo $zeiten_text; ?>
-        </span>
-        <span class="oz-heute-bemerkung"><?php echo $bemerkung ? '(' . esc_html($bemerkung) . ')' : ''; ?></span>
         <?php if ($show_status): ?>
             <span class="oz-status" data-oz-status></span>
         <?php endif; ?>
@@ -284,21 +250,14 @@ function oz_oeffnungszeiten_spezial_shortcode($atts) {
         'title_tag' => 'h2'
     ], $atts, 'oeffnungszeiten_spezial');
 
-    $spezial   = oz_get_oeffnungszeiten_spezial();
-    $heute     = current_time('Y-m-d');
-    $tage      = intval($atts['tage']);
-    $max_datum = date('Y-m-d', strtotime("+{$tage} days", current_time('timestamp')));
+    $spezial = oz_get_oeffnungszeiten_spezial();
+    $heute   = current_time('Y-m-d');
 
-    $kommend = array_filter($spezial, function($eintrag) use ($heute, $max_datum) {
-        return $eintrag['datum'] >= $heute && $eintrag['datum'] <= $max_datum;
-    });
+    // PHP filtert nur eindeutig vergangene Einträge; tage-Fenster und limit
+    // übernimmt JS clientseitig anhand des echten Datums des Besuchers.
+    $kommend = array_filter($spezial, fn($e) => $e['datum'] >= $heute);
 
     if (empty($kommend)) return '';
-
-    $limit = intval($atts['limit']);
-    if ($limit > 0) {
-        $kommend = array_slice($kommend, 0, $limit);
-    }
 
     oz_enqueue_styles();
 
@@ -307,7 +266,10 @@ function oz_oeffnungszeiten_spezial_shortcode($atts) {
 
     ob_start();
     ?>
-    <div class="oz-oeffnungszeiten-spezial">
+    <div class="oz-oeffnungszeiten-spezial"
+         data-oz-spezial
+         data-tage="<?php echo intval($atts['tage']); ?>"
+         data-limit="<?php echo intval($atts['limit']); ?>">
         <?php if (!empty($atts['title'])): ?>
             <<?php echo $title_tag; ?> class="oz-shortcode-title"><?php echo esc_html($atts['title']); ?></<?php echo $title_tag; ?>>
         <?php endif; ?>
@@ -316,7 +278,7 @@ function oz_oeffnungszeiten_spezial_shortcode($atts) {
                 <?php foreach ($kommend as $eintrag):
                     $datum = date_i18n('l, j. F Y', strtotime($eintrag['datum']));
                 ?>
-                <tr>
+                <tr data-datum="<?php echo esc_attr($eintrag['datum']); ?>">
                     <td class="oz-spezial-datum"><?php echo esc_html($datum); ?></td>
                     <td class="oz-spezial-info">
                         <?php if ($eintrag['status'] === 'geschlossen'): ?>
