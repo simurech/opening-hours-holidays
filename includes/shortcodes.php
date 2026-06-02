@@ -108,9 +108,14 @@ function oz_enqueue_styles() {
     wp_add_inline_style('oz-oeffnungszeiten', $inline_css);
 
     wp_enqueue_script('oz-oeffnungszeiten', OZ_PLUGIN_URL . 'assets/js/oeffnungszeiten.js', [], OZ_PLUGIN_VERSION, true);
+
+    $tz_obj = wp_timezone();
+    $tz_now = new DateTime('now', $tz_obj);
     wp_localize_script('oz-oeffnungszeiten', 'ozData', [
-        'regulaer' => oz_get_oeffnungszeiten(),
-        'spezial'  => oz_get_oeffnungszeiten_spezial(),
+        'regulaer'   => oz_get_oeffnungszeiten(),
+        'spezial'    => oz_get_oeffnungszeiten_spezial(),
+        'timezone'   => wp_timezone_string(),
+        'utc_offset' => intval($tz_now->getOffset() / 60),
     ]);
 }
 

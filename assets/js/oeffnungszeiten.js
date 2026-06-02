@@ -1,13 +1,45 @@
 (function () {
-    const dagKeys = ['sonntag', 'montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag'];
+    const weekdayMap = {
+        'Sunday': 'sonntag', 'Monday': 'montag', 'Tuesday': 'dienstag',
+        'Wednesday': 'mittwoch', 'Thursday': 'donnerstag',
+        'Friday': 'freitag', 'Saturday': 'samstag'
+    };
 
     function getNow() {
-        const d = new Date();
-        const pad = n => String(n).padStart(2, '0');
+        const now = new Date();
+        const tz  = (typeof ozData !== 'undefined' && ozData.timezone) ? ozData.timezone : null;
+
+        // Intl API: gibt korrekte Geschäfts-Ortszeit zurück, unabhängig vom Standort des Besuchers
+        if (tz && typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
+            try {
+                const fmtParts = (opts) =>
+                    new Intl.DateTimeFormat('en', Object.assign({ timeZone: tz }, opts)).formatToParts(now);
+                const get = (parts, type) => (parts.find(p => p.type === type) || {}).value || '';
+
+                const dp   = fmtParts({ year: 'numeric', month: '2-digit', day: '2-digit' });
+                const tp   = fmtParts({ hour: '2-digit', minute: '2-digit', hour12: false });
+                const hour = get(tp, 'hour') === '24' ? '00' : get(tp, 'hour');
+                const wd   = new Intl.DateTimeFormat('en', { timeZone: tz, weekday: 'long' }).format(now);
+
+                return {
+                    date:   get(dp, 'year') + '-' + get(dp, 'month') + '-' + get(dp, 'day'),
+                    time:   hour + ':' + get(tp, 'minute'),
+                    dayKey: weekdayMap[wd] || 'montag'
+                };
+            } catch (e) { /* Fallback */ }
+        }
+
+        // Fallback: UTC-Offset aus PHP (korrekt zum Zeitpunkt des Cache-Aufbaus, kann bei
+        // Zeitumstellung um ±1h abweichen – tritt höchstens zweimal jährlich auf)
+        const pad    = n => String(n).padStart(2, '0');
+        const offset = (typeof ozData !== 'undefined' && ozData.utc_offset) ? parseInt(ozData.utc_offset) : 0;
+        const d      = new Date(now.getTime() + offset * 60000);
+        const days   = ['sonntag', 'montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag'];
+
         return {
-            date:   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
-            time:   `${pad(d.getHours())}:${pad(d.getMinutes())}`,
-            dayKey: dagKeys[d.getDay()]
+            date:   d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()),
+            time:   pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()),
+            dayKey: days[d.getUTCDay()]
         };
     }
 
