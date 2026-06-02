@@ -1,0 +1,48 @@
+/**
+ * Admin Styles – Öffnungszeiten Plugin
+ */
+
+.oz-oeffnungszeiten-table .oz-time-input {
+    width: 100px;
+}
+
+.oz-oeffnungszeiten-table td {
+    vertical-align: middle;
+}
+
+.oz-spezial-table input[type="date"] {
+    width: 130px;
+}
+
+.oz-spezial-table .oz-time-input {
+    width: 85px;
+}
+
+.oz-spezial-table .oz-spezial-zeiten {
+    white-space: nowrap;
+}
+
+.oz-spezial-table .oz-remove-row {
+    color: #a00;
+    font-weight: bold;
+    padding: 0 8px;
+}
+
+.oz-spezial-table .oz-remove-row:hover {
+    background: #fbeaea;
+    border-color: #d63638;
+}
+
+.oz-vergangen {
+    opacity: 0.5;
+}
+
+.oz-vergangen td::after {
+    content: ' (vergangen)';
+    color: #999;
+    font-size: 0.85em;
+}
+
+.oz-vergangen td:first-child::after {
+    content: '';
+}
