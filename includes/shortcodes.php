@@ -64,36 +64,6 @@ function oz_get_spezial_fuer_datum($datum) {
 }
 
 /**
- * Hilfsfunktion: Prüfen ob gerade geöffnet
- */
-function oz_ist_jetzt_offen() {
-    $heute          = current_time('Y-m-d');
-    $jetzt          = current_time('H:i');
-    $wochentag_key  = oz_get_wochentag_key(current_time('l'));
-    $spezial        = oz_get_spezial_fuer_datum($heute);
-
-    if ($spezial) {
-        if ($spezial['status'] === 'geschlossen') return false;
-        return oz_zeit_in_fenster($jetzt, $spezial['von1'], $spezial['bis1']) ||
-               oz_zeit_in_fenster($jetzt, $spezial['von2'], $spezial['bis2']);
-    }
-
-    $tag = oz_get_oeffnungszeiten()[$wochentag_key];
-    if (!$tag['offen']) return false;
-
-    return oz_zeit_in_fenster($jetzt, $tag['von1'], $tag['bis1']) ||
-           oz_zeit_in_fenster($jetzt, $tag['von2'], $tag['bis2']);
-}
-
-/**
- * Hilfsfunktion: Zeit in Zeitfenster prüfen
- */
-function oz_zeit_in_fenster($jetzt, $von, $bis) {
-    if (empty($von) || empty($bis)) return false;
-    return $jetzt >= $von && $jetzt <= $bis;
-}
-
-/**
  * CSS laden (mit Inline-Styles für Design-Einstellungen)
  */
 function oz_enqueue_styles() {
@@ -109,11 +79,17 @@ function oz_enqueue_styles() {
 
     wp_enqueue_script('oz-oeffnungszeiten', OZ_PLUGIN_URL . 'assets/js/oeffnungszeiten.js', [], OZ_PLUGIN_VERSION, true);
 
-    $tz_obj = wp_timezone();
-    $tz_now = new DateTime('now', $tz_obj);
+    $tz_obj          = wp_timezone();
+    $tz_now          = new DateTime('now', $tz_obj);
+    $heute_str       = current_time('Y-m-d');
+    $spezial_aktuell = array_values(array_filter(
+        oz_get_oeffnungszeiten_spezial(),
+        fn($e) => $e['datum'] >= $heute_str
+    ));
     wp_localize_script('oz-oeffnungszeiten', 'ozData', [
         'regulaer'   => oz_get_oeffnungszeiten(),
-        'spezial'    => oz_get_oeffnungszeiten_spezial(),
+        'spezial'    => $spezial_aktuell,
+        'wochentage' => oz_get_wochentage(),
         'timezone'   => wp_timezone_string(),
         'utc_offset' => intval($tz_now->getOffset() / 60),
     ]);
@@ -283,14 +259,12 @@ function oz_oeffnungszeiten_heute_shortcode($atts) {
 
     ob_start();
     ?>
-    <div class="oz-oeffnungszeiten-heute">
+    <div class="oz-oeffnungszeiten-heute" data-oz-heute>
         <span class="oz-heute-tag"><?php echo esc_html($wochentag_name); ?>:</span>
         <span class="oz-heute-zeiten <?php echo $ist_geschlossen ? 'oz-geschlossen' : ''; ?>">
             <?php echo $zeiten_text; ?>
         </span>
-        <?php if ($bemerkung): ?>
-            <span class="oz-heute-bemerkung">(<?php echo esc_html($bemerkung); ?>)</span>
-        <?php endif; ?>
+        <span class="oz-heute-bemerkung"><?php echo $bemerkung ? '(' . esc_html($bemerkung) . ')' : ''; ?></span>
         <?php if ($show_status): ?>
             <span class="oz-status" data-oz-status></span>
         <?php endif; ?>

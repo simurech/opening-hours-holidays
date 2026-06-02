@@ -9,7 +9,7 @@
         const now = new Date();
         const tz  = (typeof ozData !== 'undefined' && ozData.timezone) ? ozData.timezone : null;
 
-        // Intl API: gibt korrekte Geschäfts-Ortszeit zurück, unabhängig vom Standort des Besuchers
+        // Intl API: korrekte Geschäfts-Ortszeit unabhängig vom Standort des Besuchers
         if (tz && typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
             try {
                 const fmtParts = (opts) =>
@@ -29,8 +29,7 @@
             } catch (e) { /* Fallback */ }
         }
 
-        // Fallback: UTC-Offset aus PHP (korrekt zum Zeitpunkt des Cache-Aufbaus, kann bei
-        // Zeitumstellung um ±1h abweichen – tritt höchstens zweimal jährlich auf)
+        // Fallback: UTC-Offset aus PHP (korrekt zum Cache-Zeitpunkt, ±1h bei Zeitumstellung möglich)
         const pad    = n => String(n).padStart(2, '0');
         const offset = (typeof ozData !== 'undefined' && ozData.utc_offset) ? parseInt(ozData.utc_offset) : 0;
         const d      = new Date(now.getTime() + offset * 60000);
@@ -41,6 +40,13 @@
             time:   pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()),
             dayKey: days[d.getUTCDay()]
         };
+    }
+
+    function formatZeiten(von1, bis1, von2, bis2) {
+        if (!von1 || !bis1) return 'Geschlossen';
+        let s = von1 + ' – ' + bis1;
+        if (von2 && bis2) s += ' / ' + von2 + ' – ' + bis2;
+        return s;
     }
 
     function zeitInFenster(jetzt, von, bis) {
@@ -66,10 +72,11 @@
     document.addEventListener('DOMContentLoaded', () => {
         const now = getNow();
 
-        // "Heute"-Zeile in der Wochenübersicht markieren
+        // Wochenübersicht: heutige Zeile markieren + aria-current
         document.querySelectorAll('.oz-oeffnungszeiten-tabelle tr[data-tag]').forEach(row => {
             if (row.dataset.tag === now.dayKey) {
                 row.classList.add('oz-heute');
+                row.setAttribute('aria-current', 'date');
                 const tagName = row.querySelector('.oz-tag-name');
                 if (tagName) {
                     const span = document.createElement('span');
@@ -78,6 +85,42 @@
                     tagName.appendChild(span);
                 }
             }
+        });
+
+        // [oeffnungszeiten_heute]: Wochentag und Zeiten clientseitig aktualisieren
+        document.querySelectorAll('[data-oz-heute]').forEach(container => {
+            const wochentage = (typeof ozData !== 'undefined' && ozData.wochentage) ? ozData.wochentage : {};
+            const dayName    = wochentage[now.dayKey] || now.dayKey;
+
+            const spezial = (ozData.spezial || []).find(e => e.datum === now.date);
+            let zeitenText, istGeschlossen = false, bemerkung = '';
+
+            if (spezial) {
+                istGeschlossen = spezial.status === 'geschlossen';
+                zeitenText     = istGeschlossen
+                    ? 'Geschlossen'
+                    : formatZeiten(spezial.von1, spezial.bis1, spezial.von2, spezial.bis2);
+                bemerkung = spezial.bemerkung || '';
+            } else {
+                const tag = (ozData.regulaer || {})[now.dayKey];
+                if (!tag || !parseInt(tag.offen)) {
+                    zeitenText = 'Geschlossen'; istGeschlossen = true;
+                } else {
+                    zeitenText = formatZeiten(tag.von1, tag.bis1, tag.von2, tag.bis2);
+                }
+            }
+
+            const tagEl = container.querySelector('.oz-heute-tag');
+            if (tagEl) tagEl.textContent = dayName + ':';
+
+            const zeitenEl = container.querySelector('.oz-heute-zeiten');
+            if (zeitenEl) {
+                zeitenEl.textContent = zeitenText;
+                zeitenEl.classList.toggle('oz-geschlossen', istGeschlossen);
+            }
+
+            const bemerkungEl = container.querySelector('.oz-heute-bemerkung');
+            if (bemerkungEl) bemerkungEl.textContent = bemerkung ? '(' + bemerkung + ')' : '';
         });
 
         // Status-Badges aktualisieren

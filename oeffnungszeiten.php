@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Öffnungszeiten Plugin
  * Description: Verwalte reguläre und spezielle Öffnungszeiten mit Shortcodes.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: Simon Urech
  * Author URI: https://urech.dev
  * Text Domain: oeffnungszeiten
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('OZ_PLUGIN_VERSION', '1.0.1');
+define('OZ_PLUGIN_VERSION', '1.1.0');
 define('OZ_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('OZ_PLUGIN_URL', plugin_dir_url(__FILE__));
 

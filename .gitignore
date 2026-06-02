@@ -1,0 +1,62 @@
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editors & IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Tool & config directories
+.claude/
+.cursor/
+.aider*
+.continue/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# PHP / Composer
+vendor/
+composer.lock
+
+# Build & cache
+dist/
+build/
+.sass-cache/
+*.cache
+
+# Environment
+.env
+.env.*
+.env.local
+
+# Logs
+*.log
+
+# WordPress
+wp-config.php
+/wp-content/uploads/
+
+# Release archives
+*.zip
+*.tar.gz
+
+# Temp & backup
+*.tmp
+*.bak
+*.orig
