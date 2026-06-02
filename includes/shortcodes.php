@@ -225,7 +225,33 @@ function oz_oeffnungszeiten_shortcode($atts) {
 function oz_oeffnungszeiten_heute_shortcode($atts) {
     oz_enqueue_styles();
 
-    $optionen    = oz_get_oeffnungszeiten_optionen();
+    $wochentage      = oz_get_wochentage();
+    $zeiten          = oz_get_oeffnungszeiten();
+    $optionen        = oz_get_oeffnungszeiten_optionen();
+    $heute           = current_time('Y-m-d');
+    $wochentag_key   = oz_get_wochentag_key(current_time('l'));
+    $wochentag_name  = $wochentage[$wochentag_key];
+    $spezial         = oz_get_spezial_fuer_datum($heute);
+    $zeiten_text     = '';
+    $bemerkung       = '';
+    $ist_geschlossen = false;
+
+    if ($spezial) {
+        if ($spezial['status'] === 'geschlossen') {
+            $zeiten_text = 'Geschlossen'; $ist_geschlossen = true;
+        } else {
+            $zeiten_text = oz_format_zeiten($spezial['von1'], $spezial['bis1'], $spezial['von2'], $spezial['bis2']);
+        }
+        $bemerkung = $spezial['bemerkung'];
+    } else {
+        $tag = $zeiten[$wochentag_key];
+        if ($tag['offen']) {
+            $zeiten_text = oz_format_zeiten($tag['von1'], $tag['bis1'], $tag['von2'], $tag['bis2']);
+        } else {
+            $zeiten_text = 'Geschlossen'; $ist_geschlossen = true;
+        }
+    }
+
     $show_status = $optionen['jetzt_offen'];
 
     ob_start();
@@ -235,6 +261,17 @@ function oz_oeffnungszeiten_heute_shortcode($atts) {
             <span class="oz-status" data-oz-status></span>
         <?php endif; ?>
     </div>
+    <noscript>
+        <div class="oz-oeffnungszeiten-heute">
+            <span class="oz-heute-tag"><?php echo esc_html($wochentag_name); ?>:</span>
+            <span class="oz-heute-zeiten <?php echo $ist_geschlossen ? 'oz-geschlossen' : ''; ?>">
+                <?php echo $zeiten_text; ?>
+            </span>
+            <?php if ($bemerkung): ?>
+                <span class="oz-heute-bemerkung">(<?php echo esc_html($bemerkung); ?>)</span>
+            <?php endif; ?>
+        </div>
+    </noscript>
     <?php
     return ob_get_clean();
 }
