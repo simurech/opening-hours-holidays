@@ -67,9 +67,9 @@ function oz_get_spezial_fuer_datum($datum) {
  * Hilfsfunktion: Prüfen ob gerade geöffnet
  */
 function oz_ist_jetzt_offen() {
-    $heute          = date('Y-m-d');
-    $jetzt          = date('H:i');
-    $wochentag_key  = oz_get_wochentag_key(date('l'));
+    $heute          = current_time('Y-m-d');
+    $jetzt          = current_time('H:i');
+    $wochentag_key  = oz_get_wochentag_key(current_time('l'));
     $spezial        = oz_get_spezial_fuer_datum($heute);
 
     if ($spezial) {
@@ -156,8 +156,8 @@ function oz_oeffnungszeiten_shortcode($atts) {
     $wochentage   = oz_get_wochentage();
     $zeiten       = oz_get_oeffnungszeiten();
     $spezial      = oz_get_oeffnungszeiten_spezial();
-    $heute_key    = oz_get_wochentag_key(date('l'));
-    $heute_datum  = date('Y-m-d');
+    $heute_key    = oz_get_wochentag_key(current_time('l'));
+    $heute_datum  = current_time('Y-m-d');
 
     // Spezielle Öffnungszeiten der nächsten 7 Tage vorbereiten
     $spezial_map = [];
@@ -244,8 +244,8 @@ function oz_oeffnungszeiten_heute_shortcode($atts) {
     $wochentage    = oz_get_wochentage();
     $zeiten        = oz_get_oeffnungszeiten();
     $optionen      = oz_get_oeffnungszeiten_optionen();
-    $heute         = date('Y-m-d');
-    $wochentag_key = oz_get_wochentag_key(date('l'));
+    $heute         = current_time('Y-m-d');
+    $wochentag_key = oz_get_wochentag_key(current_time('l'));
     $wochentag_name = $wochentage[$wochentag_key];
     $spezial       = oz_get_spezial_fuer_datum($heute);
 
@@ -306,7 +306,7 @@ function oz_oeffnungszeiten_spezial_shortcode($atts) {
     ], $atts, 'oeffnungszeiten_spezial');
 
     $spezial   = oz_get_oeffnungszeiten_spezial();
-    $heute     = date('Y-m-d');
+    $heute     = current_time('Y-m-d');
     $tage      = intval($atts['tage']);
     $max_datum = date('Y-m-d', strtotime("+{} days"));
 
@@ -417,7 +417,7 @@ function oz_oeffnungszeiten_kompakt_shortcode($atts) {
     $wochentage    = oz_get_wochentage();
     $zeiten        = oz_get_oeffnungszeiten();
     $optionen      = oz_get_oeffnungszeiten_optionen();
-    $heute         = date('Y-m-d');
+    $heute         = current_time('Y-m-d');
     $spezial_heute = oz_get_spezial_fuer_datum($heute);
 
     $gruppen     = oz_group_tage_by_zeiten($zeiten, $wochentage);

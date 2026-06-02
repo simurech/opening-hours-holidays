@@ -249,7 +249,7 @@ function oz_oeffnungszeiten_page() {
     $spezial    = oz_get_oeffnungszeiten_spezial();
     $optionen   = oz_get_oeffnungszeiten_optionen();
     $design     = oz_get_oeffnungszeiten_design();
-    $heute      = date('Y-m-d');
+    $heute      = current_time('Y-m-d');
     ?>
     <div class="wrap">
         <h1>Öffnungszeiten</h1>
