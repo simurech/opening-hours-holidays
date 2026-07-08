@@ -1,75 +1,49 @@
-# Öffnungszeiten Plugin
+# Opening Hours & Holidays
 
-WordPress-Plugin zur Verwaltung von regulären und speziellen Öffnungszeiten mit Shortcodes.
+WordPress plugin to manage regular opening hours and holiday exceptions, display them via shortcodes and add schema.org structured data for local SEO.
+
+Formerly known as "Öffnungszeiten Plugin" — settings from version 1.x are migrated automatically and the old German shortcodes keep working as aliases.
 
 ## Features
 
-- Reguläre Öffnungszeiten pro Wochentag (bis zu zwei Zeitfenster pro Tag)
-- Spezielle Öffnungszeiten für Feiertage, Betriebsferien und Ausnahmen
-- Vier Shortcodes für verschiedene Darstellungsformen
-- „Jetzt geöffnet / Aktuell geschlossen"-Badge
-- Kompatibel mit Full-Page-Caching (LiteSpeed, WP Rocket u.a.)
-- Korrekte Zeitzonenbehandlung – auch für internationale Besucher
-- Anpassbares Design (Farben, Zebra-Streifen, Badges) über den Admin-Bereich
+- Regular opening hours per weekday (up to two time windows per day)
+- Holiday exceptions: closed days or modified hours for specific dates
+- Four shortcodes for different layouts
+- "Open now / Currently closed" badge
+- Compatible with full-page caching (LiteSpeed, WP Rocket etc.)
+- Correct time zone handling — also for international visitors
+- Optional schema.org LocalBusiness JSON-LD output
+- Customizable design (colors, zebra stripes, badges)
+- Fully translatable; German translation bundled
 
 ## Shortcodes
 
-### Wochenübersicht
+| Shortcode | Purpose | Attributes |
+|-----------|---------|------------|
+| `[opening_hours]` | Weekly table, today highlighted | `title`, `title_tag` |
+| `[opening_hours_today]` | Today's hours with optional status badge | – |
+| `[opening_hours_holidays]` | Upcoming holidays/exceptions | `days` (30), `limit`, `title`, `title_tag` |
+| `[opening_hours_compact]` | Compact list for footer/sidebar, equal days grouped | `status`, `title`, `title_tag` |
 
-```
-[oeffnungszeiten]
-[oeffnungszeiten title="Unsere Öffnungszeiten" title_tag="h2"]
-```
+Legacy aliases: `[oeffnungszeiten]`, `[oeffnungszeiten_heute]`, `[oeffnungszeiten_spezial]` (incl. `tage` attribute), `[oeffnungszeiten_kompakt]`.
 
-Zeigt alle Wochentage als Tabelle. Der heutige Tag wird hervorgehoben.
+## Developers
 
-### Heutiger Tag
+Extend the schema.org output via the `ohhol_schema_data` filter:
 
-```
-[oeffnungszeiten_heute]
-```
-
-Zeigt den aktuellen Wochentag mit Öffnungszeiten und optionalem Status-Badge.
-
-### Spezielle Öffnungszeiten
-
-```
-[oeffnungszeiten_spezial]
-[oeffnungszeiten_spezial tage="60" limit="5" title="Feiertage"]
+```php
+add_filter('ohhol_schema_data', function ($schema) {
+    $schema['@type']     = 'Restaurant';
+    $schema['telephone'] = '+41 ...';
+    return $schema;
+});
 ```
 
-Zeigt kommende Sondertage (Feiertage, Betriebsferien etc.).
-
-| Parameter | Standard | Beschreibung |
-|-----------|----------|--------------|
-| `tage` | `30` | Vorschau in Tagen |
-| `limit` | unbegrenzt | Max. Anzahl Einträge |
-| `title` | – | Optionaler Titel |
-| `title_tag` | `h2` | HTML-Tag für den Titel |
-
-### Kompakte Übersicht
-
-```
-[oeffnungszeiten_kompakt]
-[oeffnungszeiten_kompakt title="Öffnungszeiten" status="1"]
-```
-
-Platzsparende Liste für Footer oder Sidebar. Tage mit gleichen Zeiten werden automatisch zusammengefasst (z.B. „Montag – Freitag").
-
-| Parameter | Standard | Beschreibung |
-|-----------|----------|--------------|
-| `status` | `0` | Status-Badge anzeigen (`1` = ja) |
-| `title` | – | Optionaler Titel |
-| `title_tag` | `h3` | HTML-Tag für den Titel |
-
-## Installation
-
-1. Plugin-Ordner nach `/wp-content/plugins/oeffnungszeiten-plugin/` hochladen
-2. Plugin im WordPress-Admin unter **Plugins** aktivieren
-3. Öffnungszeiten unter dem Menüpunkt **Öffnungszeiten** konfigurieren
-4. Shortcodes in Seiten, Beiträgen oder Widgets einbinden
-
-## Voraussetzungen
+## Requirements
 
 - WordPress 5.8+
 - PHP 7.4+
+
+## License
+
+GPLv2 or later. See `readme.txt` for the full plugin directory readme.

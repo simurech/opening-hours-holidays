@@ -1,6 +1,6 @@
 <?php
 /**
- * Einstellungen: Öffnungszeiten
+ * Settings: opening hours, holidays, options, design.
  */
 
 if (!defined('ABSPATH')) {
@@ -8,218 +8,231 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Menü hinzufügen
+ * Admin menu.
  */
-function oz_oeffnungszeiten_menu() {
+function ohhol_admin_menu() {
     add_menu_page(
-        'Öffnungszeiten',
-        'Öffnungszeiten',
+        __('Opening Hours', 'opening-hours-holidays'),
+        __('Opening Hours', 'opening-hours-holidays'),
         'manage_options',
-        'oz-oeffnungszeiten',
-        'oz_oeffnungszeiten_page',
+        'ohhol-settings',
+        'ohhol_settings_page',
         'dashicons-clock',
         26
     );
 }
-add_action('admin_menu', 'oz_oeffnungszeiten_menu');
+add_action('admin_menu', 'ohhol_admin_menu');
 
 /**
- * Einstellungen registrieren
+ * Register settings.
  */
-function oz_oeffnungszeiten_register_settings() {
-    register_setting('oz_oeffnungszeiten', 'oz_oeffnungszeiten', [
-        'sanitize_callback' => 'oz_sanitize_oeffnungszeiten'
+function ohhol_register_settings() {
+    register_setting('ohhol_settings', 'ohhol_hours', [
+        'sanitize_callback' => 'ohhol_sanitize_hours',
     ]);
-
-    register_setting('oz_oeffnungszeiten', 'oz_oeffnungszeiten_spezial', [
-        'sanitize_callback' => 'oz_sanitize_oeffnungszeiten_spezial'
+    register_setting('ohhol_settings', 'ohhol_holidays', [
+        'sanitize_callback' => 'ohhol_sanitize_holidays',
     ]);
-
-    register_setting('oz_oeffnungszeiten', 'oz_oeffnungszeiten_optionen', [
-        'sanitize_callback' => 'oz_sanitize_oeffnungszeiten_optionen'
+    register_setting('ohhol_settings', 'ohhol_options', [
+        'sanitize_callback' => 'ohhol_sanitize_options',
     ]);
-
-    register_setting('oz_oeffnungszeiten', 'oz_oeffnungszeiten_design', [
-        'sanitize_callback' => 'oz_sanitize_oeffnungszeiten_design'
+    register_setting('ohhol_settings', 'ohhol_design', [
+        'sanitize_callback' => 'ohhol_sanitize_design',
     ]);
 }
-add_action('admin_init', 'oz_oeffnungszeiten_register_settings');
+add_action('admin_init', 'ohhol_register_settings');
 
 /**
- * Wochentage
+ * Weekday keys in display order with translated labels.
  */
-function oz_get_wochentage() {
+function ohhol_get_weekdays() {
     return [
-        'montag'     => 'Montag',
-        'dienstag'   => 'Dienstag',
-        'mittwoch'   => 'Mittwoch',
-        'donnerstag' => 'Donnerstag',
-        'freitag'    => 'Freitag',
-        'samstag'    => 'Samstag',
-        'sonntag'    => 'Sonntag'
+        'monday'    => __('Monday', 'opening-hours-holidays'),
+        'tuesday'   => __('Tuesday', 'opening-hours-holidays'),
+        'wednesday' => __('Wednesday', 'opening-hours-holidays'),
+        'thursday'  => __('Thursday', 'opening-hours-holidays'),
+        'friday'    => __('Friday', 'opening-hours-holidays'),
+        'saturday'  => __('Saturday', 'opening-hours-holidays'),
+        'sunday'    => __('Sunday', 'opening-hours-holidays'),
     ];
 }
 
 /**
- * Standard-Öffnungszeiten
+ * Default weekly hours.
  */
-function oz_get_oeffnungszeiten_defaults() {
+function ohhol_get_hours_defaults() {
     $defaults = [];
-    foreach (oz_get_wochentage() as $key => $name) {
+    foreach (array_keys(ohhol_get_weekdays()) as $key) {
         $defaults[$key] = [
-            'offen' => ($key !== 'sonntag') ? 1 : 0,
-            'von1'  => '09:00',
-            'bis1'  => '12:00',
-            'von2'  => '13:30',
-            'bis2'  => '18:00'
+            'open'   => ($key !== 'sunday') ? 1 : 0,
+            'open1'  => '09:00',
+            'close1' => '12:00',
+            'open2'  => '13:30',
+            'close2' => '18:00',
         ];
     }
     return $defaults;
 }
 
 /**
- * Öffnungszeiten abrufen (mit Caching)
+ * Weekly hours (cached per request).
  */
-function oz_get_oeffnungszeiten() {
+function ohhol_get_hours() {
     static $cached = null;
-    if ($cached !== null) return $cached;
-    $saved = get_option('oz_oeffnungszeiten', []);
-    $cached = wp_parse_args($saved, oz_get_oeffnungszeiten_defaults());
+    if ($cached !== null) {
+        return $cached;
+    }
+    $saved  = get_option('ohhol_hours', []);
+    $cached = wp_parse_args($saved, ohhol_get_hours_defaults());
     return $cached;
 }
 
 /**
- * Spezielle Öffnungszeiten abrufen (mit Caching)
+ * Holiday entries (cached per request).
  */
-function oz_get_oeffnungszeiten_spezial() {
+function ohhol_get_holidays() {
     static $cached = null;
-    if ($cached !== null) return $cached;
-    $cached = get_option('oz_oeffnungszeiten_spezial', []);
+    if ($cached !== null) {
+        return $cached;
+    }
+    $cached = get_option('ohhol_holidays', []);
     return $cached;
 }
 
 /**
- * Optionen abrufen (mit Caching)
+ * General options (cached per request).
  */
-function oz_get_oeffnungszeiten_optionen() {
+function ohhol_get_options() {
     static $cached = null;
-    if ($cached !== null) return $cached;
-    $defaults = ['jetzt_offen' => 0];
-    $cached = wp_parse_args(get_option('oz_oeffnungszeiten_optionen', []), $defaults);
+    if ($cached !== null) {
+        return $cached;
+    }
+    $defaults = [
+        'show_status'    => 0,
+        'schema_enabled' => 0,
+        'schema_name'    => '',
+    ];
+    $cached = wp_parse_args(get_option('ohhol_options', []), $defaults);
     return $cached;
 }
 
 /**
- * Standard-Design-Werte
+ * Default design values.
  */
-function oz_get_oeffnungszeiten_design_defaults() {
+function ohhol_get_design_defaults() {
     return [
-        // Heute-Badge
-        'heute_badge_bg'   => '#000000',
-        'heute_badge_text' => '#ffffff',
-        // Zebra-Streifen
-        'zebra_color'      => '#f9f9f9',
-        'zebra_enabled'    => 1,
-        // Textfarben
-        'text_muted'       => '#666666',
-        'text_faint'       => '#999999',
-        // Semantische Farben
-        'geschlossen_farbe' => '#c62828',
-        // Badge "Jetzt geöffnet"
-        'offen_bg'         => '#e8f5e9',
-        'offen_text'       => '#2e7d32',
-        'offen_dot'        => '#4caf50',
-        // Badge "Aktuell geschlossen"
-        'zu_bg'            => '#ffebee',
-        'zu_text'          => '#c62828',
-        'zu_dot'           => '#f44336',
+        'today_bg'     => '#000000',
+        'today_text'   => '#ffffff',
+        'zebra_color'  => '#f9f9f9',
+        'zebra_enabled' => 1,
+        'text_muted'   => '#666666',
+        'text_faint'   => '#999999',
+        'closed_color' => '#c62828',
+        'open_bg'      => '#e8f5e9',
+        'open_text'    => '#2e7d32',
+        'open_dot'     => '#4caf50',
+        'closed_bg'    => '#ffebee',
+        'closed_text'  => '#c62828',
+        'closed_dot'   => '#f44336',
     ];
 }
 
 /**
- * Design-Einstellungen abrufen (mit Caching)
+ * Design settings (cached per request).
  */
-function oz_get_oeffnungszeiten_design() {
+function ohhol_get_design() {
     static $cached = null;
-    if ($cached !== null) return $cached;
-    $settings = get_option('oz_oeffnungszeiten_design', []);
-    $cached = wp_parse_args($settings, oz_get_oeffnungszeiten_design_defaults());
+    if ($cached !== null) {
+        return $cached;
+    }
+    $cached = wp_parse_args(get_option('ohhol_design', []), ohhol_get_design_defaults());
     return $cached;
 }
 
 /**
- * Sanitize: Reguläre Öffnungszeiten
+ * Sanitize: weekly hours.
  */
-function oz_sanitize_oeffnungszeiten($input) {
+function ohhol_sanitize_hours($input) {
+    $input     = is_array($input) ? $input : [];
     $sanitized = [];
-    foreach (oz_get_wochentage() as $key => $name) {
+    foreach (array_keys(ohhol_get_weekdays()) as $key) {
         $sanitized[$key] = [
-            'offen' => isset($input[$key]['offen']) ? 1 : 0,
-            'von1'  => oz_sanitize_time($input[$key]['von1'] ?? ''),
-            'bis1'  => oz_sanitize_time($input[$key]['bis1'] ?? ''),
-            'von2'  => oz_sanitize_time($input[$key]['von2'] ?? ''),
-            'bis2'  => oz_sanitize_time($input[$key]['bis2'] ?? '')
+            'open'   => isset($input[$key]['open']) ? 1 : 0,
+            'open1'  => ohhol_sanitize_time($input[$key]['open1'] ?? ''),
+            'close1' => ohhol_sanitize_time($input[$key]['close1'] ?? ''),
+            'open2'  => ohhol_sanitize_time($input[$key]['open2'] ?? ''),
+            'close2' => ohhol_sanitize_time($input[$key]['close2'] ?? ''),
         ];
     }
     return $sanitized;
 }
 
 /**
- * Sanitize: Spezielle Öffnungszeiten
+ * Sanitize: holiday entries.
+ *
+ * Validates dates, deduplicates by date and drops entries
+ * that are more than 90 days in the past.
  */
-function oz_sanitize_oeffnungszeiten_spezial($input) {
-    if (!is_array($input)) return [];
+function ohhol_sanitize_holidays($input) {
+    if (!is_array($input)) {
+        return [];
+    }
 
+    $cutoff    = gmdate('Y-m-d', strtotime('-90 days', current_datetime()->getTimestamp()));
     $sanitized = [];
+
     foreach ($input as $item) {
-        if (empty($item['datum'])) continue;
-        $sanitized[] = [
-            'datum'     => sanitize_text_field($item['datum']),
-            'status'    => in_array($item['status'], ['geschlossen', 'geaendert'])
-                          ? $item['status']
-                          : 'geschlossen',
-            'von1'      => oz_sanitize_time($item['von1'] ?? ''),
-            'bis1'      => oz_sanitize_time($item['bis1'] ?? ''),
-            'von2'      => oz_sanitize_time($item['von2'] ?? ''),
-            'bis2'      => oz_sanitize_time($item['bis2'] ?? ''),
-            'bemerkung' => sanitize_text_field($item['bemerkung'] ?? '')
+        $date = ohhol_sanitize_date($item['date'] ?? '');
+        if ($date === '' || $date < $cutoff) {
+            continue;
+        }
+        $status = (isset($item['status']) && in_array($item['status'], ['closed', 'modified'], true))
+            ? $item['status']
+            : 'closed';
+
+        // Last entry for a date wins.
+        $sanitized[$date] = [
+            'date'   => $date,
+            'status' => $status,
+            'open1'  => ohhol_sanitize_time($item['open1'] ?? ''),
+            'close1' => ohhol_sanitize_time($item['close1'] ?? ''),
+            'open2'  => ohhol_sanitize_time($item['open2'] ?? ''),
+            'close2' => ohhol_sanitize_time($item['close2'] ?? ''),
+            'note'   => sanitize_text_field($item['note'] ?? ''),
         ];
     }
 
-    usort($sanitized, function($a, $b) {
-        return strtotime($a['datum']) - strtotime($b['datum']);
-    });
-
-    return $sanitized;
+    ksort($sanitized);
+    return array_values($sanitized);
 }
 
 /**
- * Sanitize: Optionen
+ * Sanitize: general options.
  */
-function oz_sanitize_oeffnungszeiten_optionen($input) {
-    return ['jetzt_offen' => isset($input['jetzt_offen']) ? 1 : 0];
-}
-
-/**
- * Sanitize: Design-Einstellungen
- */
-function oz_sanitize_oeffnungszeiten_design($input) {
-    $sanitized = [];
-    $defaults  = oz_get_oeffnungszeiten_design_defaults();
-
-    $color_fields = [
-        'heute_badge_bg', 'heute_badge_text',
-        'zebra_color',
-        'text_muted', 'text_faint',
-        'geschlossen_farbe',
-        'offen_bg', 'offen_text', 'offen_dot',
-        'zu_bg', 'zu_text', 'zu_dot',
+function ohhol_sanitize_options($input) {
+    $input = is_array($input) ? $input : [];
+    return [
+        'show_status'    => isset($input['show_status']) ? 1 : 0,
+        'schema_enabled' => isset($input['schema_enabled']) ? 1 : 0,
+        'schema_name'    => sanitize_text_field($input['schema_name'] ?? ''),
     ];
+}
 
-    foreach ($color_fields as $field) {
+/**
+ * Sanitize: design settings.
+ */
+function ohhol_sanitize_design($input) {
+    $input     = is_array($input) ? $input : [];
+    $sanitized = [];
+    $defaults  = ohhol_get_design_defaults();
+
+    foreach ($defaults as $field => $default) {
+        if ($field === 'zebra_enabled') {
+            continue;
+        }
         if (isset($input[$field])) {
             $color = sanitize_hex_color($input[$field]);
-            $sanitized[$field] = $color ?: $defaults[$field];
+            $sanitized[$field] = $color ?: $default;
         }
     }
 
@@ -228,9 +241,9 @@ function oz_sanitize_oeffnungszeiten_design($input) {
 }
 
 /**
- * Zeit sanitieren (Format HH:MM)
+ * Sanitize a time string (HH:MM, 24h).
  */
-function oz_sanitize_time($time) {
+function ohhol_sanitize_time($time) {
     $time = sanitize_text_field($time);
     if (preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $time)) {
         return $time;
@@ -239,379 +252,345 @@ function oz_sanitize_time($time) {
 }
 
 /**
- * Einstellungsseite
+ * Sanitize a date string (Y-m-d). Returns '' if invalid.
  */
-function oz_oeffnungszeiten_page() {
-    if (!current_user_can('manage_options')) return;
+function ohhol_sanitize_date($date) {
+    $date = sanitize_text_field($date);
+    if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $m)) {
+        return '';
+    }
+    if (!checkdate((int) $m[2], (int) $m[3], (int) $m[1])) {
+        return '';
+    }
+    return $date;
+}
 
-    $wochentage = oz_get_wochentage();
-    $zeiten     = oz_get_oeffnungszeiten();
-    $spezial    = oz_get_oeffnungszeiten_spezial();
-    $optionen   = oz_get_oeffnungszeiten_optionen();
-    $design     = oz_get_oeffnungszeiten_design();
-    $heute      = current_time('Y-m-d');
+/**
+ * Render one holiday table row (used for saved entries; the JS template
+ * for new rows lives in admin/admin.js and must be kept in sync).
+ */
+function ohhol_render_holiday_row($index, $entry, $is_past) {
+    ?>
+    <tr class="<?php echo $is_past ? 'ohhol-past' : ''; ?>">
+        <td>
+            <input type="date"
+                   name="ohhol_holidays[<?php echo (int) $index; ?>][date]"
+                   value="<?php echo esc_attr($entry['date']); ?>">
+        </td>
+        <td>
+            <select name="ohhol_holidays[<?php echo (int) $index; ?>][status]" class="ohhol-status-select">
+                <option value="closed" <?php selected($entry['status'], 'closed'); ?>><?php esc_html_e('Closed', 'opening-hours-holidays'); ?></option>
+                <option value="modified" <?php selected($entry['status'], 'modified'); ?>><?php esc_html_e('Modified hours', 'opening-hours-holidays'); ?></option>
+            </select>
+        </td>
+        <td class="ohhol-holiday-times">
+            <input type="time" name="ohhol_holidays[<?php echo (int) $index; ?>][open1]" value="<?php echo esc_attr($entry['open1']); ?>" class="ohhol-time-input">
+            <span>–</span>
+            <input type="time" name="ohhol_holidays[<?php echo (int) $index; ?>][close1]" value="<?php echo esc_attr($entry['close1']); ?>" class="ohhol-time-input">
+            <span class="ohhol-window-sep">/</span>
+            <input type="time" name="ohhol_holidays[<?php echo (int) $index; ?>][open2]" value="<?php echo esc_attr($entry['open2']); ?>" class="ohhol-time-input">
+            <span>–</span>
+            <input type="time" name="ohhol_holidays[<?php echo (int) $index; ?>][close2]" value="<?php echo esc_attr($entry['close2']); ?>" class="ohhol-time-input">
+        </td>
+        <td>
+            <input type="text"
+                   name="ohhol_holidays[<?php echo (int) $index; ?>][note]"
+                   value="<?php echo esc_attr($entry['note']); ?>"
+                   placeholder="<?php echo esc_attr__('e.g. Public holiday', 'opening-hours-holidays'); ?>"
+                   class="regular-text">
+        </td>
+        <td>
+            <button type="button" class="button ohhol-remove-row" aria-label="<?php echo esc_attr__('Remove entry', 'opening-hours-holidays'); ?>">×</button>
+        </td>
+    </tr>
+    <?php
+}
+
+/**
+ * Settings page.
+ */
+function ohhol_settings_page() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    $weekdays = ohhol_get_weekdays();
+    $hours    = ohhol_get_hours();
+    $holidays = ohhol_get_holidays();
+    $options  = ohhol_get_options();
+    $design   = ohhol_get_design();
+    $today    = current_time('Y-m-d');
     ?>
     <div class="wrap">
-        <h1>Öffnungszeiten</h1>
+        <h1><?php esc_html_e('Opening Hours', 'opening-hours-holidays'); ?></h1>
 
         <form method="post" action="options.php">
-            <?php settings_fields('oz_oeffnungszeiten'); ?>
+            <?php settings_fields('ohhol_settings'); ?>
 
-            <h2>Reguläre Öffnungszeiten</h2>
-            <table class="widefat oz-oeffnungszeiten-table">
+            <h2><?php esc_html_e('Regular opening hours', 'opening-hours-holidays'); ?></h2>
+            <table class="widefat ohhol-hours-table">
                 <thead>
                     <tr>
-                        <th style="width: 120px;">Tag</th>
-                        <th style="width: 60px;">Offen</th>
-                        <th>Vormittag / Zeitfenster 1</th>
-                        <th>Nachmittag / Zeitfenster 2</th>
+                        <th class="ohhol-col-day"><?php esc_html_e('Day', 'opening-hours-holidays'); ?></th>
+                        <th class="ohhol-col-open"><?php esc_html_e('Open', 'opening-hours-holidays'); ?></th>
+                        <th><?php esc_html_e('Time window 1 (e.g. morning)', 'opening-hours-holidays'); ?></th>
+                        <th><?php esc_html_e('Time window 2 (e.g. afternoon)', 'opening-hours-holidays'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($wochentage as $key => $name):
-                        $tag = $zeiten[$key];
+                    <?php foreach ($weekdays as $key => $label):
+                        $day = $hours[$key];
                     ?>
                     <tr>
-                        <td><strong><?php echo esc_html($name); ?></strong></td>
+                        <td><strong><?php echo esc_html($label); ?></strong></td>
                         <td>
                             <input type="checkbox"
-                                   name="oz_oeffnungszeiten[<?php echo esc_attr($key); ?>][offen]"
+                                   name="ohhol_hours[<?php echo esc_attr($key); ?>][open]"
                                    value="1"
-                                   class="oz-offen-toggle"
-                                   data-tag="<?php echo esc_attr($key); ?>"
-                                   <?php checked($tag['offen'], 1); ?>>
+                                   class="ohhol-open-toggle"
+                                   data-day="<?php echo esc_attr($key); ?>"
+                                   <?php checked($day['open'], 1); ?>>
                         </td>
-                        <td class="oz-zeiten-cell" data-tag="<?php echo esc_attr($key); ?>">
+                        <td class="ohhol-times-cell" data-day="<?php echo esc_attr($key); ?>">
                             <input type="time"
-                                   name="oz_oeffnungszeiten[<?php echo esc_attr($key); ?>][von1]"
-                                   value="<?php echo esc_attr($tag['von1']); ?>"
-                                   class="oz-time-input">
+                                   name="ohhol_hours[<?php echo esc_attr($key); ?>][open1]"
+                                   value="<?php echo esc_attr($day['open1']); ?>"
+                                   class="ohhol-time-input">
                             <span>–</span>
                             <input type="time"
-                                   name="oz_oeffnungszeiten[<?php echo esc_attr($key); ?>][bis1]"
-                                   value="<?php echo esc_attr($tag['bis1']); ?>"
-                                   class="oz-time-input">
+                                   name="ohhol_hours[<?php echo esc_attr($key); ?>][close1]"
+                                   value="<?php echo esc_attr($day['close1']); ?>"
+                                   class="ohhol-time-input">
                         </td>
-                        <td class="oz-zeiten-cell" data-tag="<?php echo esc_attr($key); ?>">
+                        <td class="ohhol-times-cell" data-day="<?php echo esc_attr($key); ?>">
                             <input type="time"
-                                   name="oz_oeffnungszeiten[<?php echo esc_attr($key); ?>][von2]"
-                                   value="<?php echo esc_attr($tag['von2']); ?>"
-                                   class="oz-time-input">
+                                   name="ohhol_hours[<?php echo esc_attr($key); ?>][open2]"
+                                   value="<?php echo esc_attr($day['open2']); ?>"
+                                   class="ohhol-time-input">
                             <span>–</span>
                             <input type="time"
-                                   name="oz_oeffnungszeiten[<?php echo esc_attr($key); ?>][bis2]"
-                                   value="<?php echo esc_attr($tag['bis2']); ?>"
-                                   class="oz-time-input">
-                            <span class="description" style="margin-left: 10px;">Leer lassen falls keine Pause</span>
+                                   name="ohhol_hours[<?php echo esc_attr($key); ?>][close2]"
+                                   value="<?php echo esc_attr($day['close2']); ?>"
+                                   class="ohhol-time-input">
+                            <span class="description ohhol-hint"><?php esc_html_e('Leave empty if there is no break', 'opening-hours-holidays'); ?></span>
                         </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
 
-            <h2 style="margin-top: 40px;">Spezielle Öffnungszeiten</h2>
-            <p class="description">Feiertage, Betriebsferien oder abweichende Zeiten für bestimmte Daten.</p>
+            <h2 class="ohhol-section"><?php esc_html_e('Holidays & exceptions', 'opening-hours-holidays'); ?></h2>
+            <p class="description"><?php esc_html_e('Public holidays, company holidays or deviating hours on specific dates. Entries more than 90 days in the past are removed automatically when saving.', 'opening-hours-holidays'); ?></p>
 
-            <table class="widefat oz-spezial-table" id="oz-spezial-table">
+            <table class="widefat ohhol-holidays-table">
                 <thead>
                     <tr>
-                        <th style="width: 140px;">Datum</th>
-                        <th style="width: 130px;">Status</th>
-                        <th>Zeiten (falls geändert)</th>
-                        <th style="width: 200px;">Bemerkung</th>
-                        <th style="width: 50px;"></th>
+                        <th class="ohhol-col-date"><?php esc_html_e('Date', 'opening-hours-holidays'); ?></th>
+                        <th class="ohhol-col-status"><?php esc_html_e('Status', 'opening-hours-holidays'); ?></th>
+                        <th><?php esc_html_e('Hours (if modified)', 'opening-hours-holidays'); ?></th>
+                        <th class="ohhol-col-note"><?php esc_html_e('Note', 'opening-hours-holidays'); ?></th>
+                        <th class="ohhol-col-remove"></th>
                     </tr>
                 </thead>
-                <tbody id="oz-spezial-body">
-                    <?php if (!empty($spezial)): ?>
-                        <?php foreach ($spezial as $index => $eintrag):
-                            $vergangen = $eintrag['datum'] < $heute;
-                        ?>
-                        <tr class="<?php echo $vergangen ? 'oz-vergangen' : ''; ?>">
-                            <td>
-                                <input type="date"
-                                       name="oz_oeffnungszeiten_spezial[<?php echo $index; ?>][datum]"
-                                       value="<?php echo esc_attr($eintrag['datum']); ?>">
-                            </td>
-                            <td>
-                                <select name="oz_oeffnungszeiten_spezial[<?php echo $index; ?>][status]"
-                                        class="oz-status-select">
-                                    <option value="geschlossen" <?php selected($eintrag['status'], 'geschlossen'); ?>>Geschlossen</option>
-                                    <option value="geaendert" <?php selected($eintrag['status'], 'geaendert'); ?>>Geänderte Zeiten</option>
-                                </select>
-                            </td>
-                            <td class="oz-spezial-zeiten">
-                                <input type="time" name="oz_oeffnungszeiten_spezial[<?php echo $index; ?>][von1]" value="<?php echo esc_attr($eintrag['von1']); ?>" class="oz-time-input">
-                                <span>–</span>
-                                <input type="time" name="oz_oeffnungszeiten_spezial[<?php echo $index; ?>][bis1]" value="<?php echo esc_attr($eintrag['bis1']); ?>" class="oz-time-input">
-                                <span style="margin: 0 5px;">/</span>
-                                <input type="time" name="oz_oeffnungszeiten_spezial[<?php echo $index; ?>][von2]" value="<?php echo esc_attr($eintrag['von2']); ?>" class="oz-time-input">
-                                <span>–</span>
-                                <input type="time" name="oz_oeffnungszeiten_spezial[<?php echo $index; ?>][bis2]" value="<?php echo esc_attr($eintrag['bis2']); ?>" class="oz-time-input">
-                            </td>
-                            <td>
-                                <input type="text"
-                                       name="oz_oeffnungszeiten_spezial[<?php echo $index; ?>][bemerkung]"
-                                       value="<?php echo esc_attr($eintrag['bemerkung']); ?>"
-                                       placeholder="z.B. Feiertag"
-                                       class="regular-text">
-                            </td>
-                            <td>
-                                <button type="button" class="button oz-remove-row">×</button>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                <tbody id="ohhol-holidays-body" data-next-index="<?php echo esc_attr(count($holidays)); ?>">
+                    <?php foreach ($holidays as $index => $entry):
+                        ohhol_render_holiday_row($index, $entry, $entry['date'] < $today);
+                    endforeach; ?>
                 </tbody>
             </table>
 
             <p>
-                <button type="button" class="button" id="oz-add-spezial">+ Eintrag hinzufügen</button>
+                <button type="button" class="button" id="ohhol-add-holiday">+ <?php esc_html_e('Add entry', 'opening-hours-holidays'); ?></button>
             </p>
 
-            <h2 style="margin-top: 40px;">Optionen</h2>
-            <table class="form-table">
+            <h2 class="ohhol-section"><?php esc_html_e('Options', 'opening-hours-holidays'); ?></h2>
+            <table class="form-table" role="presentation">
                 <tr>
-                    <th scope="row">"Jetzt geöffnet" anzeigen</th>
+                    <th scope="row"><?php esc_html_e('Show "Open now" status', 'opening-hours-holidays'); ?></th>
                     <td>
                         <label>
                             <input type="checkbox"
-                                   name="oz_oeffnungszeiten_optionen[jetzt_offen]"
+                                   name="ohhol_options[show_status]"
                                    value="1"
-                                   <?php checked($optionen['jetzt_offen'], 1); ?>>
-                            Beim Shortcode <code>[oeffnungszeiten_heute]</code> anzeigen, ob gerade geöffnet ist
+                                   <?php checked($options['show_status'], 1); ?>>
+                            <?php
+                            printf(
+                                /* translators: %s: shortcode name */
+                                esc_html__('Show whether the business is currently open in the %s shortcode', 'opening-hours-holidays'),
+                                '<code>[opening_hours_today]</code>'
+                            );
+                            ?>
                         </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e('Schema.org structured data', 'opening-hours-holidays'); ?></th>
+                    <td>
+                        <label>
+                            <input type="checkbox"
+                                   name="ohhol_options[schema_enabled]"
+                                   value="1"
+                                   <?php checked($options['schema_enabled'], 1); ?>>
+                            <?php esc_html_e('Add LocalBusiness structured data (JSON-LD) with your opening hours to every page — helps search engines display your hours', 'opening-hours-holidays'); ?>
+                        </label>
+                        <p style="margin-top: 10px;">
+                            <label for="ohhol-schema-name"><?php esc_html_e('Business name', 'opening-hours-holidays'); ?></label><br>
+                            <input type="text"
+                                   id="ohhol-schema-name"
+                                   name="ohhol_options[schema_name]"
+                                   value="<?php echo esc_attr($options['schema_name']); ?>"
+                                   class="regular-text"
+                                   placeholder="<?php echo esc_attr(get_bloginfo('name')); ?>">
+                        </p>
+                        <p class="description"><?php esc_html_e('Leave empty to use the site title.', 'opening-hours-holidays'); ?></p>
                     </td>
                 </tr>
             </table>
 
-            <h2 style="margin-top: 40px;">Design-Einstellungen</h2>
-            <p class="description" style="margin-bottom: 15px;">
-                Schriftart und primäre Textfarbe werden automatisch vom Theme übernommen.<br>
-                Die folgenden Farben können hier angepasst werden.
+            <h2 class="ohhol-section"><?php esc_html_e('Design', 'opening-hours-holidays'); ?></h2>
+            <p class="description">
+                <?php esc_html_e('Font and primary text color are inherited from your theme. The colors below can be customized.', 'opening-hours-holidays'); ?>
             </p>
 
-            <h3>Texte &amp; Tabelle</h3>
-            <table class="form-table">
+            <h3><?php esc_html_e('Text & table', 'opening-hours-holidays'); ?></h3>
+            <table class="form-table" role="presentation">
                 <tr>
-                    <th scope="row">Gedämpfte Textfarbe</th>
+                    <th scope="row"><?php esc_html_e('Muted text color', 'opening-hours-holidays'); ?></th>
                     <td>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[text_muted]"
-                               value="<?php echo esc_attr($design['text_muted']); ?>">
+                        <input type="color" name="ohhol_design[text_muted]" value="<?php echo esc_attr($design['text_muted']); ?>">
                         <code><?php echo esc_html($design['text_muted']); ?></code>
-                        <p class="description">Für Uhrzeiten und Nebeninformationen (Standard: #666666)</p>
+                        <p class="description"><?php esc_html_e('Used for times and secondary information (default: #666666)', 'opening-hours-holidays'); ?></p>
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row">Sehr gedämpfte Textfarbe</th>
+                    <th scope="row"><?php esc_html_e('Faint text color', 'opening-hours-holidays'); ?></th>
                     <td>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[text_faint]"
-                               value="<?php echo esc_attr($design['text_faint']); ?>">
+                        <input type="color" name="ohhol_design[text_faint]" value="<?php echo esc_attr($design['text_faint']); ?>">
                         <code><?php echo esc_html($design['text_faint']); ?></code>
-                        <p class="description">Für Bemerkungen und Klammerzusätze (Standard: #999999)</p>
+                        <p class="description"><?php esc_html_e('Used for notes and additions in brackets (default: #999999)', 'opening-hours-holidays'); ?></p>
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row">Zebra-Streifen aktivieren</th>
+                    <th scope="row"><?php esc_html_e('Zebra stripes', 'opening-hours-holidays'); ?></th>
                     <td>
                         <label>
-                            <input type="checkbox"
-                                   name="oz_oeffnungszeiten_design[zebra_enabled]"
-                                   value="1"
-                                   <?php checked($design['zebra_enabled'], 1); ?>>
-                            Ungerade Zeilen farblich hinterlegen
+                            <input type="checkbox" name="ohhol_design[zebra_enabled]" value="1" <?php checked($design['zebra_enabled'], 1); ?>>
+                            <?php esc_html_e('Add a background color to odd rows', 'opening-hours-holidays'); ?>
                         </label>
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row">Zebra-Streifen Farbe</th>
+                    <th scope="row"><?php esc_html_e('Zebra stripe color', 'opening-hours-holidays'); ?></th>
                     <td>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[zebra_color]"
-                               value="<?php echo esc_attr($design['zebra_color']); ?>">
+                        <input type="color" name="ohhol_design[zebra_color]" value="<?php echo esc_attr($design['zebra_color']); ?>">
                         <code><?php echo esc_html($design['zebra_color']); ?></code>
-                        <p class="description">Hintergrundfarbe für ungerade Zeilen (nur wenn aktiviert)</p>
                     </td>
                 </tr>
             </table>
 
-            <h3 style="margin-top: 30px;">"Heute"-Marker</h3>
-            <table class="form-table">
+            <h3 class="ohhol-subsection"><?php esc_html_e('"Today" marker', 'opening-hours-holidays'); ?></h3>
+            <table class="form-table" role="presentation">
                 <tr>
-                    <th scope="row">Hintergrundfarbe</th>
+                    <th scope="row"><?php esc_html_e('Background color', 'opening-hours-holidays'); ?></th>
                     <td>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[heute_badge_bg]"
-                               value="<?php echo esc_attr($design['heute_badge_bg']); ?>">
-                        <code><?php echo esc_html($design['heute_badge_bg']); ?></code>
+                        <input type="color" name="ohhol_design[today_bg]" value="<?php echo esc_attr($design['today_bg']); ?>">
+                        <code><?php echo esc_html($design['today_bg']); ?></code>
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row">Textfarbe</th>
+                    <th scope="row"><?php esc_html_e('Text color', 'opening-hours-holidays'); ?></th>
                     <td>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[heute_badge_text]"
-                               value="<?php echo esc_attr($design['heute_badge_text']); ?>">
-                        <code><?php echo esc_html($design['heute_badge_text']); ?></code>
+                        <input type="color" name="ohhol_design[today_text]" value="<?php echo esc_attr($design['today_text']); ?>">
+                        <code><?php echo esc_html($design['today_text']); ?></code>
                     </td>
                 </tr>
             </table>
 
-            <h3 style="margin-top: 30px;">Status-Farben</h3>
-            <table class="form-table">
+            <h3 class="ohhol-subsection"><?php esc_html_e('Status colors', 'opening-hours-holidays'); ?></h3>
+            <table class="form-table" role="presentation">
                 <tr>
-                    <th scope="row">Geschlossen-Farbe</th>
+                    <th scope="row"><?php esc_html_e('"Closed" text color', 'opening-hours-holidays'); ?></th>
                     <td>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[geschlossen_farbe]"
-                               value="<?php echo esc_attr($design['geschlossen_farbe']); ?>">
-                        <code><?php echo esc_html($design['geschlossen_farbe']); ?></code>
-                        <p class="description">Textfarbe für "Geschlossen"</p>
+                        <input type="color" name="ohhol_design[closed_color]" value="<?php echo esc_attr($design['closed_color']); ?>">
+                        <code><?php echo esc_html($design['closed_color']); ?></code>
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row">Badge "Jetzt geöffnet"</th>
+                    <th scope="row"><?php esc_html_e('"Open now" badge', 'opening-hours-holidays'); ?></th>
                     <td>
-                        <label>Hintergrund</label>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[offen_bg]"
-                               value="<?php echo esc_attr($design['offen_bg']); ?>">
-                        <code><?php echo esc_html($design['offen_bg']); ?></code>
+                        <label><?php esc_html_e('Background', 'opening-hours-holidays'); ?></label>
+                        <input type="color" name="ohhol_design[open_bg]" value="<?php echo esc_attr($design['open_bg']); ?>">
+                        <code><?php echo esc_html($design['open_bg']); ?></code>
                         &nbsp;&nbsp;
-                        <label>Text</label>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[offen_text]"
-                               value="<?php echo esc_attr($design['offen_text']); ?>">
-                        <code><?php echo esc_html($design['offen_text']); ?></code>
+                        <label><?php esc_html_e('Text', 'opening-hours-holidays'); ?></label>
+                        <input type="color" name="ohhol_design[open_text]" value="<?php echo esc_attr($design['open_text']); ?>">
+                        <code><?php echo esc_html($design['open_text']); ?></code>
                         &nbsp;&nbsp;
-                        <label>Punkt</label>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[offen_dot]"
-                               value="<?php echo esc_attr($design['offen_dot']); ?>">
-                        <code><?php echo esc_html($design['offen_dot']); ?></code>
+                        <label><?php esc_html_e('Dot', 'opening-hours-holidays'); ?></label>
+                        <input type="color" name="ohhol_design[open_dot]" value="<?php echo esc_attr($design['open_dot']); ?>">
+                        <code><?php echo esc_html($design['open_dot']); ?></code>
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row">Badge "Aktuell geschlossen"</th>
+                    <th scope="row"><?php esc_html_e('"Currently closed" badge', 'opening-hours-holidays'); ?></th>
                     <td>
-                        <label>Hintergrund</label>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[zu_bg]"
-                               value="<?php echo esc_attr($design['zu_bg']); ?>">
-                        <code><?php echo esc_html($design['zu_bg']); ?></code>
+                        <label><?php esc_html_e('Background', 'opening-hours-holidays'); ?></label>
+                        <input type="color" name="ohhol_design[closed_bg]" value="<?php echo esc_attr($design['closed_bg']); ?>">
+                        <code><?php echo esc_html($design['closed_bg']); ?></code>
                         &nbsp;&nbsp;
-                        <label>Text</label>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[zu_text]"
-                               value="<?php echo esc_attr($design['zu_text']); ?>">
-                        <code><?php echo esc_html($design['zu_text']); ?></code>
+                        <label><?php esc_html_e('Text', 'opening-hours-holidays'); ?></label>
+                        <input type="color" name="ohhol_design[closed_text]" value="<?php echo esc_attr($design['closed_text']); ?>">
+                        <code><?php echo esc_html($design['closed_text']); ?></code>
                         &nbsp;&nbsp;
-                        <label>Punkt</label>
-                        <input type="color"
-                               name="oz_oeffnungszeiten_design[zu_dot]"
-                               value="<?php echo esc_attr($design['zu_dot']); ?>">
-                        <code><?php echo esc_html($design['zu_dot']); ?></code>
+                        <label><?php esc_html_e('Dot', 'opening-hours-holidays'); ?></label>
+                        <input type="color" name="ohhol_design[closed_dot]" value="<?php echo esc_attr($design['closed_dot']); ?>">
+                        <code><?php echo esc_html($design['closed_dot']); ?></code>
                     </td>
                 </tr>
             </table>
 
-            <?php submit_button('Einstellungen speichern'); ?>
+            <?php submit_button(__('Save settings', 'opening-hours-holidays')); ?>
         </form>
 
-        <hr style="margin-top: 40px;">
+        <hr class="ohhol-section">
 
-        <h2>Shortcode-Anleitung</h2>
-        <div style="background: #fff; border: 1px solid #ccd0d4; padding: 20px; margin-bottom: 20px;">
-            <h3>Wochenübersicht</h3>
-            <code style="display: block; background: #f0f0f1; padding: 10px; margin: 10px 0;">[oeffnungszeiten]</code>
-            <p>Zeigt eine Tabelle mit allen Wochentagen und den regulären Öffnungszeiten.</p>
-            <h4 style="margin-top: 15px; font-size: 13px;">Parameter:</h4>
-            <ul style="margin: 10px 0; padding-left: 20px;">
-                <li><code>title="Unsere Öffnungszeiten"</code> – Optional: Titel über der Tabelle</li>
-                <li><code>title_tag="h2"</code> – Optional: HTML-Tag für den Titel (Standard: h2)</li>
+        <h2><?php esc_html_e('Shortcode reference', 'opening-hours-holidays'); ?></h2>
+        <div class="ohhol-doc-box">
+            <h3><?php esc_html_e('Weekly overview', 'opening-hours-holidays'); ?></h3>
+            <code class="ohhol-doc-code">[opening_hours]</code>
+            <p><?php esc_html_e('Shows a table with all weekdays and the regular opening hours. The current day is highlighted.', 'opening-hours-holidays'); ?></p>
+            <ul class="ohhol-doc-list">
+                <li><code>title="…"</code> – <?php esc_html_e('Optional title above the table', 'opening-hours-holidays'); ?></li>
+                <li><code>title_tag="h2"</code> – <?php esc_html_e('HTML tag for the title (default: h2)', 'opening-hours-holidays'); ?></li>
             </ul>
 
-            <h3 style="margin-top: 25px;">Heutiger Tag</h3>
-            <code style="display: block; background: #f0f0f1; padding: 10px; margin: 10px 0;">[oeffnungszeiten_heute]</code>
-            <p>Zeigt nur den heutigen Tag mit Öffnungszeiten. Berücksichtigt spezielle Öffnungszeiten automatisch.</p>
+            <h3><?php esc_html_e('Today', 'opening-hours-holidays'); ?></h3>
+            <code class="ohhol-doc-code">[opening_hours_today]</code>
+            <p><?php esc_html_e('Shows only the current day. Holiday exceptions are applied automatically.', 'opening-hours-holidays'); ?></p>
 
-            <h3 style="margin-top: 25px;">Spezielle Öffnungszeiten</h3>
-            <code style="display: block; background: #f0f0f1; padding: 10px; margin: 10px 0;">[oeffnungszeiten_spezial]</code>
-            <p>Zeigt kommende spezielle Öffnungszeiten (Feiertage, Betriebsferien, etc.).</p>
-            <h4 style="margin-top: 15px; font-size: 13px;">Parameter:</h4>
-            <ul style="margin: 10px 0; padding-left: 20px;">
-                <li><code>tage="30"</code> – Nur Einträge bis X Tage in der Zukunft (Standard: 30)</li>
-                <li><code>limit="5"</code> – Maximale Anzahl Einträge (optional)</li>
-                <li><code>title="Besondere Tage"</code> – Optional: Titel (nur wenn Daten vorhanden)</li>
-                <li><code>title_tag="h2"</code> – Optional: HTML-Tag für den Titel (Standard: h2)</li>
+            <h3><?php esc_html_e('Holidays & exceptions', 'opening-hours-holidays'); ?></h3>
+            <code class="ohhol-doc-code">[opening_hours_holidays]</code>
+            <p><?php esc_html_e('Shows upcoming holidays and exceptions.', 'opening-hours-holidays'); ?></p>
+            <ul class="ohhol-doc-list">
+                <li><code>days="30"</code> – <?php esc_html_e('Only entries up to X days in the future (default: 30)', 'opening-hours-holidays'); ?></li>
+                <li><code>limit="5"</code> – <?php esc_html_e('Maximum number of entries (optional)', 'opening-hours-holidays'); ?></li>
+                <li><code>title="…"</code> – <?php esc_html_e('Optional title (only shown if there are entries)', 'opening-hours-holidays'); ?></li>
+                <li><code>title_tag="h2"</code> – <?php esc_html_e('HTML tag for the title (default: h2)', 'opening-hours-holidays'); ?></li>
             </ul>
 
-            <h3 style="margin-top: 25px;">Kompakte Übersicht (Footer/Sidebar)</h3>
-            <code style="display: block; background: #f0f0f1; padding: 10px; margin: 10px 0;">[oeffnungszeiten_kompakt]</code>
-            <p>Platzsparende Darstellung. Tage mit gleichen Zeiten werden automatisch zusammengefasst (z.B. "Montag – Freitag").</p>
-            <h4 style="margin-top: 15px; font-size: 13px;">Parameter:</h4>
-            <ul style="margin: 10px 0; padding-left: 20px;">
-                <li><code>status="1"</code> – "Jetzt geöffnet / Aktuell geschlossen" Badge anzeigen</li>
-                <li><code>title="Öffnungszeiten"</code> – Optionaler Titel</li>
-                <li><code>title_tag="h3"</code> – HTML-Tag für den Titel (Standard: h3)</li>
+            <h3><?php esc_html_e('Compact overview (footer/sidebar)', 'opening-hours-holidays'); ?></h3>
+            <code class="ohhol-doc-code">[opening_hours_compact]</code>
+            <p><?php esc_html_e('Space-saving list. Consecutive days with identical hours are grouped automatically (e.g. "Monday – Friday").', 'opening-hours-holidays'); ?></p>
+            <ul class="ohhol-doc-list">
+                <li><code>status="1"</code> – <?php esc_html_e('Show the "Open now / Currently closed" badge', 'opening-hours-holidays'); ?></li>
+                <li><code>title="…"</code> – <?php esc_html_e('Optional title', 'opening-hours-holidays'); ?></li>
+                <li><code>title_tag="h3"</code> – <?php esc_html_e('HTML tag for the title (default: h3)', 'opening-hours-holidays'); ?></li>
             </ul>
-            <h4 style="margin-top: 15px; font-size: 13px;">Beispiel:</h4>
-            <code style="display: block; background: #f0f0f1; padding: 10px; margin: 10px 0;">[oeffnungszeiten_kompakt title="Öffnungszeiten" status="1"]</code>
+
+            <p class="description">
+                <?php esc_html_e('The legacy shortcodes [oeffnungszeiten], [oeffnungszeiten_heute], [oeffnungszeiten_spezial] and [oeffnungszeiten_kompakt] keep working as aliases.', 'opening-hours-holidays'); ?>
+            </p>
         </div>
     </div>
-
-    <script>
-    jQuery(document).ready(function($) {
-        var spezialIndex = <?php echo !empty($spezial) ? max(array_keys($spezial)) + 1 : 0; ?>;
-
-        $('#oz-add-spezial').on('click', function() {
-            var row = `
-                <tr>
-                    <td><input type="date" name="oz_oeffnungszeiten_spezial[${spezialIndex}][datum]"></td>
-                    <td>
-                        <select name="oz_oeffnungszeiten_spezial[${spezialIndex}][status]" class="oz-status-select">
-                            <option value="geschlossen">Geschlossen</option>
-                            <option value="geaendert">Geänderte Zeiten</option>
-                        </select>
-                    </td>
-                    <td class="oz-spezial-zeiten">
-                        <input type="time" name="oz_oeffnungszeiten_spezial[${spezialIndex}][von1]" class="oz-time-input">
-                        <span>–</span>
-                        <input type="time" name="oz_oeffnungszeiten_spezial[${spezialIndex}][bis1]" class="oz-time-input">
-                        <span style="margin: 0 5px;">/</span>
-                        <input type="time" name="oz_oeffnungszeiten_spezial[${spezialIndex}][von2]" class="oz-time-input">
-                        <span>–</span>
-                        <input type="time" name="oz_oeffnungszeiten_spezial[${spezialIndex}][bis2]" class="oz-time-input">
-                    </td>
-                    <td><input type="text" name="oz_oeffnungszeiten_spezial[${spezialIndex}][bemerkung]" placeholder="z.B. Feiertag" class="regular-text"></td>
-                    <td><button type="button" class="button oz-remove-row">×</button></td>
-                </tr>
-            `;
-            $('#oz-spezial-body').append(row);
-            spezialIndex++;
-        });
-
-        $(document).on('click', '.oz-remove-row', function() {
-            $(this).closest('tr').remove();
-        });
-
-        $('.oz-offen-toggle').on('change', function() {
-            var tag = $(this).data('tag');
-            var cells = $('.oz-zeiten-cell[data-tag="' + tag + '"]');
-            cells.find('input').prop('disabled', !this.checked);
-            cells.css('opacity', this.checked ? 1 : 0.4);
-        }).trigger('change');
-
-        $(document).on('change', '.oz-status-select', function() {
-            var zeitenCell = $(this).closest('tr').find('.oz-spezial-zeiten');
-            var isGeaendert = $(this).val() === 'geaendert';
-            zeitenCell.find('input').prop('disabled', !isGeaendert);
-            zeitenCell.css('opacity', isGeaendert ? 1 : 0.4);
-        });
-        $('.oz-status-select').trigger('change');
-    });
-    </script>
     <?php
 }

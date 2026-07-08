@@ -1,6 +1,6 @@
 <?php
 /**
- * Shortcodes: Öffnungszeiten
+ * Shortcodes.
  */
 
 if (!defined('ABSPATH')) {
@@ -8,206 +8,180 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Shortcodes registrieren
+ * Register shortcodes (plus legacy aliases from the pre-2.0 plugin).
  */
-function oz_register_shortcodes() {
-    add_shortcode('oeffnungszeiten', 'oz_oeffnungszeiten_shortcode');
-    add_shortcode('oeffnungszeiten_heute', 'oz_oeffnungszeiten_heute_shortcode');
-    add_shortcode('oeffnungszeiten_spezial', 'oz_oeffnungszeiten_spezial_shortcode');
-    add_shortcode('oeffnungszeiten_kompakt', 'oz_oeffnungszeiten_kompakt_shortcode');
+function ohhol_register_shortcodes() {
+    add_shortcode('opening_hours', 'ohhol_shortcode_week');
+    add_shortcode('opening_hours_today', 'ohhol_shortcode_today');
+    add_shortcode('opening_hours_holidays', 'ohhol_shortcode_holidays');
+    add_shortcode('opening_hours_compact', 'ohhol_shortcode_compact');
+
+    // Legacy aliases so existing content keeps working.
+    add_shortcode('oeffnungszeiten', 'ohhol_shortcode_week');
+    add_shortcode('oeffnungszeiten_heute', 'ohhol_shortcode_today');
+    add_shortcode('oeffnungszeiten_spezial', 'ohhol_shortcode_holidays');
+    add_shortcode('oeffnungszeiten_kompakt', 'ohhol_shortcode_compact');
 }
-add_action('init', 'oz_register_shortcodes');
+add_action('init', 'ohhol_register_shortcodes');
 
 /**
- * Hilfsfunktion: Zeitfenster formatieren
+ * Format time windows as plain text, e.g. "09:00 – 12:00 / 13:30 – 18:00".
+ * Returns '' when no valid window exists (caller renders "Closed").
  */
-function oz_format_zeiten($von1, $bis1, $von2 = '', $bis2 = '') {
-    if (empty($von1) || empty($bis1)) {
-        return 'Geschlossen';
+function ohhol_format_hours($open1, $close1, $open2 = '', $close2 = '') {
+    if (empty($open1) || empty($close1)) {
+        return '';
     }
-
-    $output = esc_html($von1) . ' – ' . esc_html($bis1);
-
-    if (!empty($von2) && !empty($bis2)) {
-        $output .= ' / ' . esc_html($von2) . ' – ' . esc_html($bis2);
+    $output = $open1 . ' – ' . $close1;
+    if (!empty($open2) && !empty($close2)) {
+        $output .= ' / ' . $open2 . ' – ' . $close2;
     }
-
     return $output;
 }
 
 /**
- * Hilfsfunktion: Wochentag-Mapping (PHP → Deutsch)
+ * Map an English PHP weekday name ("Monday") to the internal key.
  */
-function oz_get_wochentag_key($php_day) {
-    $mapping = [
-        'Monday'    => 'montag',
-        'Tuesday'   => 'dienstag',
-        'Wednesday' => 'mittwoch',
-        'Thursday'  => 'donnerstag',
-        'Friday'    => 'freitag',
-        'Saturday'  => 'samstag',
-        'Sunday'    => 'sonntag'
-    ];
-    return $mapping[$php_day] ?? 'montag';
+function ohhol_get_weekday_key($php_day) {
+    $key = strtolower($php_day);
+    return array_key_exists($key, ohhol_get_weekdays()) ? $key : 'monday';
 }
 
 /**
- * Hilfsfunktion: Spezielle Öffnungszeit für Datum prüfen
+ * Get the holiday entry for a specific date (Y-m-d) or null.
  */
-function oz_get_spezial_fuer_datum($datum) {
-    foreach (oz_get_oeffnungszeiten_spezial() as $eintrag) {
-        if ($eintrag['datum'] === $datum) {
-            return $eintrag;
+function ohhol_get_holiday_for_date($date) {
+    foreach (ohhol_get_holidays() as $entry) {
+        if ($entry['date'] === $date) {
+            return $entry;
         }
     }
     return null;
 }
 
 /**
- * CSS laden (mit Inline-Styles für Design-Einstellungen)
+ * Validate a title tag attribute against a whitelist.
  */
-function oz_enqueue_styles() {
+function ohhol_sanitize_title_tag($tag, $default = 'h2') {
+    $allowed = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+    return in_array($tag, $allowed, true) ? $tag : $default;
+}
+
+/**
+ * Enqueue frontend assets once per request (only when a shortcode is rendered).
+ */
+function ohhol_enqueue_assets() {
     static $loaded = false;
-    if ($loaded) return;
+    if ($loaded) {
+        return;
+    }
     $loaded = true;
 
-    wp_enqueue_style('oz-oeffnungszeiten', OZ_PLUGIN_URL . 'assets/css/oeffnungszeiten.css', [], OZ_PLUGIN_VERSION);
+    wp_enqueue_style('ohhol-frontend', OHHOL_URL . 'assets/css/frontend.css', [], OHHOL_VERSION);
+    wp_add_inline_style('ohhol-frontend', ohhol_generate_inline_styles(ohhol_get_design()));
 
-    $design     = oz_get_oeffnungszeiten_design();
-    $inline_css = oz_generate_inline_styles($design);
-    wp_add_inline_style('oz-oeffnungszeiten', $inline_css);
+    wp_enqueue_script('ohhol-frontend', OHHOL_URL . 'assets/js/frontend.js', [], OHHOL_VERSION, true);
 
-    wp_enqueue_script('oz-oeffnungszeiten', OZ_PLUGIN_URL . 'assets/js/oeffnungszeiten.js', [], OZ_PLUGIN_VERSION, true);
+    $tz_now = new DateTime('now', wp_timezone());
+    $today  = current_time('Y-m-d');
 
-    $tz_obj          = wp_timezone();
-    $tz_now          = new DateTime('now', $tz_obj);
-    $heute_str       = current_time('Y-m-d');
-    $spezial_aktuell = array_values(array_filter(
-        oz_get_oeffnungszeiten_spezial(),
-        fn($e) => $e['datum'] >= $heute_str
-    ));
-    wp_localize_script('oz-oeffnungszeiten', 'ozData', [
-        'regulaer'   => oz_get_oeffnungszeiten(),
-        'spezial'    => $spezial_aktuell,
-        'wochentage' => oz_get_wochentage(),
+    wp_localize_script('ohhol-frontend', 'ohholData', [
+        'regular'    => ohhol_get_hours(),
+        'holidays'   => array_values(array_filter(
+            ohhol_get_holidays(),
+            static function ($e) use ($today) {
+                return $e['date'] >= $today;
+            }
+        )),
+        'weekdays'   => ohhol_get_weekdays(),
         'timezone'   => wp_timezone_string(),
-        'utc_offset' => intval($tz_now->getOffset() / 60),
+        'utc_offset' => (int) ($tz_now->getOffset() / 60),
+        'i18n'       => [
+            'closed'    => __('Closed', 'opening-hours-holidays'),
+            'openNow'   => __('Open now', 'opening-hours-holidays'),
+            'closedNow' => __('Currently closed', 'opening-hours-holidays'),
+            'today'     => __('Today', 'opening-hours-holidays'),
+            /* translators: prefix shown before the regular hours when a holiday exception applies */
+            'regular'   => __('Regular:', 'opening-hours-holidays'),
+        ],
     ]);
 }
 
 /**
- * Inline-Styles aus Design-Einstellungen generieren (überschreibt CSS Custom Properties)
+ * Build inline CSS overriding the custom properties with the design settings.
+ * All values are validated hex colors (see ohhol_sanitize_design()).
  */
-function oz_generate_inline_styles($design) {
+function ohhol_generate_inline_styles($design) {
     $vars = [
-        '--oz-heute-badge-bg'   => $design['heute_badge_bg'],
-        '--oz-heute-badge-text' => $design['heute_badge_text'],
-        '--oz-text-muted'       => $design['text_muted'],
-        '--oz-text-faint'       => $design['text_faint'],
-        '--oz-geschlossen'      => $design['geschlossen_farbe'],
-        '--oz-offen-bg'         => $design['offen_bg'],
-        '--oz-offen-text'       => $design['offen_text'],
-        '--oz-offen-dot'        => $design['offen_dot'],
-        '--oz-zu-bg'            => $design['zu_bg'],
-        '--oz-zu-text'          => $design['zu_text'],
-        '--oz-zu-dot'           => $design['zu_dot'],
+        '--ohhol-today-bg'    => $design['today_bg'],
+        '--ohhol-today-text'  => $design['today_text'],
+        '--ohhol-text-muted'  => $design['text_muted'],
+        '--ohhol-text-faint'  => $design['text_faint'],
+        '--ohhol-closed'      => $design['closed_color'],
+        '--ohhol-open-bg'     => $design['open_bg'],
+        '--ohhol-open-text'   => $design['open_text'],
+        '--ohhol-open-dot'    => $design['open_dot'],
+        '--ohhol-shut-bg'     => $design['closed_bg'],
+        '--ohhol-shut-text'   => $design['closed_text'],
+        '--ohhol-shut-dot'    => $design['closed_dot'],
     ];
 
-    $root_css = ':root {';
+    $css = ':root {';
     foreach ($vars as $prop => $value) {
-        $root_css .= ' ' . $prop . ': ' . esc_attr($value) . ';';
+        $css .= ' ' . $prop . ': ' . sanitize_hex_color($value) . ';';
     }
-    $root_css .= ' }';
+    $css .= ' }';
 
-    if ($design['zebra_enabled']) {
-        $root_css .= sprintf(
-            ' .oz-oeffnungszeiten-tabelle tr:nth-child(odd), .oz-spezial-tabelle tr:nth-child(odd) { background-color: %s; }',
-            esc_attr($design['zebra_color'])
+    if (!empty($design['zebra_enabled'])) {
+        $css .= sprintf(
+            ' .ohhol-week-table tr:nth-child(odd), .ohhol-holidays-list tr:nth-child(odd) { background-color: %s; }',
+            sanitize_hex_color($design['zebra_color'])
         );
     }
 
-    $root_css .= ' .oz-status:empty { display: none; }';
+    $css .= ' .ohhol-status:empty { display: none; }';
 
-    return preg_replace('/\s+/', ' ', trim($root_css));
+    return $css;
 }
 
 /**
- * Shortcode: Wochenübersicht [oeffnungszeiten]
+ * Shortcode: weekly overview [opening_hours]
+ *
+ * Renders the regular hours (cache-safe). The "today" marker and any
+ * holiday overlay for the next 7 days are applied client-side.
  */
-function oz_oeffnungszeiten_shortcode($atts) {
+function ohhol_shortcode_week($atts) {
     $atts = shortcode_atts([
         'title'     => '',
-        'title_tag' => 'h2'
-    ], $atts, 'oeffnungszeiten');
+        'title_tag' => 'h2',
+    ], $atts, 'opening_hours');
 
-    oz_enqueue_styles();
+    ohhol_enqueue_assets();
 
-    $wochentage   = oz_get_wochentage();
-    $zeiten       = oz_get_oeffnungszeiten();
-    $spezial      = oz_get_oeffnungszeiten_spezial();
-    $heute_datum  = current_time('Y-m-d');
-
-    // Spezielle Öffnungszeiten der nächsten 7 Tage vorbereiten
-    $spezial_map = [];
-    foreach ($spezial as $eintrag) {
-        $diff_tage = (strtotime($eintrag['datum']) - strtotime($heute_datum)) / 86400;
-        if ($diff_tage >= 0 && $diff_tage < 7) {
-            $wochentag_key = oz_get_wochentag_key(date('l', strtotime($eintrag['datum'])));
-            $spezial_map[$wochentag_key] = $eintrag;
-        }
-    }
-
-    $allowed_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-    $title_tag    = in_array($atts['title_tag'], $allowed_tags) ? $atts['title_tag'] : 'h2';
+    $weekdays  = ohhol_get_weekdays();
+    $hours     = ohhol_get_hours();
+    $title_tag = ohhol_sanitize_title_tag($atts['title_tag']);
 
     ob_start();
     ?>
-    <div class="oz-oeffnungszeiten">
+    <div class="ohhol-week">
         <?php if (!empty($atts['title'])): ?>
-            <<?php echo $title_tag; ?> class="oz-shortcode-title"><?php echo esc_html($atts['title']); ?></<?php echo $title_tag; ?>>
+            <<?php echo $title_tag; // phpcs:ignore WordPress.Security.EscapeOutput -- whitelisted tag ?> class="ohhol-title"><?php echo esc_html($atts['title']); ?></<?php echo $title_tag; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
         <?php endif; ?>
-        <table class="oz-oeffnungszeiten-tabelle">
+        <table class="ohhol-week-table">
+            <caption class="screen-reader-text"><?php esc_html_e('Weekly opening hours', 'opening-hours-holidays'); ?></caption>
             <tbody>
-                <?php foreach ($wochentage as $key => $name):
-                    $tag             = $zeiten[$key];
-                    $hat_spezial     = isset($spezial_map[$key]);
-                    $spezial_eintrag = $hat_spezial ? $spezial_map[$key] : null;
-                    $regulaere_zeiten = '';
-
-                    if ($hat_spezial) {
-                        $regulaere_zeiten = 'Regulär: ' . ($tag['offen']
-                            ? oz_format_zeiten($tag['von1'], $tag['bis1'], $tag['von2'], $tag['bis2'])
-                            : 'Geschlossen');
-                    }
+                <?php foreach ($weekdays as $key => $label):
+                    $day       = $hours[$key];
+                    $formatted = $day['open'] ? ohhol_format_hours($day['open1'], $day['close1'], $day['open2'], $day['close2']) : '';
                 ?>
-                <tr data-tag="<?php echo esc_attr($key); ?>" class="<?php echo $hat_spezial ? 'oz-hat-spezial' : ''; ?>">
-                    <td class="oz-tag-name">
-                        <?php echo esc_html($name); ?>
-                    </td>
-                    <td class="oz-tag-zeiten">
-                        <?php if ($hat_spezial): ?>
-                            <div class="oz-zeiten-wrapper">
-                                <div class="oz-spezial-zeiten">
-                                    <?php if ($spezial_eintrag['status'] === 'geschlossen'): ?>
-                                        <span class="oz-geschlossen">Geschlossen</span>
-                                    <?php else: ?>
-                                        <?php echo oz_format_zeiten(
-                                            $spezial_eintrag['von1'], $spezial_eintrag['bis1'],
-                                            $spezial_eintrag['von2'], $spezial_eintrag['bis2']
-                                        ); ?>
-                                    <?php endif; ?>
-                                    <?php if (!empty($spezial_eintrag['bemerkung'])): ?>
-                                        <span class="oz-bemerkung-inline">(<?php echo esc_html($spezial_eintrag['bemerkung']); ?>)</span>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="oz-regulaere-zeiten">
-                                    <span class="oz-info-icon">ℹ️</span> <?php echo esc_html($regulaere_zeiten); ?>
-                                </div>
-                            </div>
-                        <?php elseif ($tag['offen']): ?>
-                            <?php echo oz_format_zeiten($tag['von1'], $tag['bis1'], $tag['von2'], $tag['bis2']); ?>
+                <tr data-day="<?php echo esc_attr($key); ?>">
+                    <th scope="row" class="ohhol-day-name"><?php echo esc_html($label); ?></th>
+                    <td class="ohhol-day-hours">
+                        <?php if ($formatted !== ''): ?>
+                            <?php echo esc_html($formatted); ?>
                         <?php else: ?>
-                            <span class="oz-geschlossen">Geschlossen</span>
+                            <span class="ohhol-closed"><?php esc_html_e('Closed', 'opening-hours-holidays'); ?></span>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -220,55 +194,56 @@ function oz_oeffnungszeiten_shortcode($atts) {
 }
 
 /**
- * Shortcode: Heute [oeffnungszeiten_heute]
+ * Shortcode: today [opening_hours_today]
+ *
+ * The visible content is built entirely client-side so full-page caching
+ * never shows a stale day. A server-rendered fallback lives in <noscript>.
  */
-function oz_oeffnungszeiten_heute_shortcode($atts) {
-    oz_enqueue_styles();
+function ohhol_shortcode_today($atts) {
+    ohhol_enqueue_assets();
 
-    $wochentage      = oz_get_wochentage();
-    $zeiten          = oz_get_oeffnungszeiten();
-    $optionen        = oz_get_oeffnungszeiten_optionen();
-    $heute           = current_time('Y-m-d');
-    $wochentag_key   = oz_get_wochentag_key(current_time('l'));
-    $wochentag_name  = $wochentage[$wochentag_key];
-    $spezial         = oz_get_spezial_fuer_datum($heute);
-    $zeiten_text     = '';
-    $bemerkung       = '';
-    $ist_geschlossen = false;
+    $weekdays    = ohhol_get_weekdays();
+    $hours       = ohhol_get_hours();
+    $options     = ohhol_get_options();
+    $today       = current_time('Y-m-d');
+    $day_key     = ohhol_get_weekday_key(current_time('l'));
+    $day_label   = $weekdays[$day_key];
+    $holiday     = ohhol_get_holiday_for_date($today);
+    $note        = '';
+    $is_closed   = false;
+    $hours_text  = '';
 
-    if ($spezial) {
-        if ($spezial['status'] === 'geschlossen') {
-            $zeiten_text = 'Geschlossen'; $ist_geschlossen = true;
+    if ($holiday) {
+        if ($holiday['status'] === 'closed') {
+            $is_closed = true;
         } else {
-            $zeiten_text = oz_format_zeiten($spezial['von1'], $spezial['bis1'], $spezial['von2'], $spezial['bis2']);
+            $hours_text = ohhol_format_hours($holiday['open1'], $holiday['close1'], $holiday['open2'], $holiday['close2']);
+            $is_closed  = ($hours_text === '');
         }
-        $bemerkung = $spezial['bemerkung'];
+        $note = $holiday['note'];
     } else {
-        $tag = $zeiten[$wochentag_key];
-        if ($tag['offen']) {
-            $zeiten_text = oz_format_zeiten($tag['von1'], $tag['bis1'], $tag['von2'], $tag['bis2']);
-        } else {
-            $zeiten_text = 'Geschlossen'; $ist_geschlossen = true;
+        $day = $hours[$day_key];
+        if ($day['open']) {
+            $hours_text = ohhol_format_hours($day['open1'], $day['close1'], $day['open2'], $day['close2']);
         }
+        $is_closed = ($hours_text === '');
     }
-
-    $show_status = $optionen['jetzt_offen'];
 
     ob_start();
     ?>
-    <div class="oz-oeffnungszeiten-heute" data-oz-heute>
-        <?php if ($show_status): ?>
-            <span class="oz-status" data-oz-status></span>
+    <div class="ohhol-today" data-ohhol-today>
+        <?php if ($options['show_status']): ?>
+            <span class="ohhol-status" data-ohhol-status role="status"></span>
         <?php endif; ?>
     </div>
     <noscript>
-        <div class="oz-oeffnungszeiten-heute">
-            <span class="oz-heute-tag"><?php echo esc_html($wochentag_name); ?>:</span>
-            <span class="oz-heute-zeiten <?php echo $ist_geschlossen ? 'oz-geschlossen' : ''; ?>">
-                <?php echo $zeiten_text; ?>
+        <div class="ohhol-today">
+            <span class="ohhol-today-day"><?php echo esc_html($day_label); ?>:</span>
+            <span class="ohhol-today-hours <?php echo $is_closed ? 'ohhol-closed' : ''; ?>">
+                <?php echo $is_closed ? esc_html__('Closed', 'opening-hours-holidays') : esc_html($hours_text); ?>
             </span>
-            <?php if ($bemerkung): ?>
-                <span class="oz-heute-bemerkung">(<?php echo esc_html($bemerkung); ?>)</span>
+            <?php if ($note): ?>
+                <span class="ohhol-today-note">(<?php echo esc_html($note); ?>)</span>
             <?php endif; ?>
         </div>
     </noscript>
@@ -277,57 +252,67 @@ function oz_oeffnungszeiten_heute_shortcode($atts) {
 }
 
 /**
- * Shortcode: Spezielle Öffnungszeiten [oeffnungszeiten_spezial]
+ * Shortcode: upcoming holidays [opening_hours_holidays]
+ *
+ * PHP only filters out clearly past entries; the days window and limit are
+ * applied client-side based on the visitor's real date (cache-safe).
  */
-function oz_oeffnungszeiten_spezial_shortcode($atts) {
+function ohhol_shortcode_holidays($atts) {
     $atts = shortcode_atts([
         'limit'     => -1,
-        'tage'      => 30,
+        'days'      => 30,
         'title'     => '',
-        'title_tag' => 'h2'
-    ], $atts, 'oeffnungszeiten_spezial');
+        'title_tag' => 'h2',
+        // Legacy attribute name from the pre-2.0 plugin.
+        'tage'      => null,
+    ], $atts, 'opening_hours_holidays');
 
-    $spezial = oz_get_oeffnungszeiten_spezial();
-    $heute   = current_time('Y-m-d');
+    if ($atts['tage'] !== null) {
+        $atts['days'] = $atts['tage'];
+    }
 
-    // PHP filtert nur eindeutig vergangene Einträge; tage-Fenster und limit
-    // übernimmt JS clientseitig anhand des echten Datums des Besuchers.
-    $kommend = array_filter($spezial, fn($e) => $e['datum'] >= $heute);
+    $today    = current_time('Y-m-d');
+    $upcoming = array_filter(ohhol_get_holidays(), static function ($e) use ($today) {
+        return $e['date'] >= $today;
+    });
 
-    if (empty($kommend)) return '';
+    if (empty($upcoming)) {
+        return '';
+    }
 
-    oz_enqueue_styles();
+    ohhol_enqueue_assets();
 
-    $allowed_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-    $title_tag    = in_array($atts['title_tag'], $allowed_tags) ? $atts['title_tag'] : 'h2';
+    $title_tag   = ohhol_sanitize_title_tag($atts['title_tag']);
+    /* translators: date format for holiday entries, see https://www.php.net/manual/datetime.format.php */
+    $date_format = _x('l, F j, Y', 'holiday date format', 'opening-hours-holidays');
 
     ob_start();
     ?>
-    <div class="oz-oeffnungszeiten-spezial"
-         data-oz-spezial
-         data-tage="<?php echo intval($atts['tage']); ?>"
-         data-limit="<?php echo intval($atts['limit']); ?>">
+    <div class="ohhol-holidays"
+         data-ohhol-holidays
+         data-days="<?php echo (int) $atts['days']; ?>"
+         data-limit="<?php echo (int) $atts['limit']; ?>">
         <?php if (!empty($atts['title'])): ?>
-            <<?php echo $title_tag; ?> class="oz-shortcode-title"><?php echo esc_html($atts['title']); ?></<?php echo $title_tag; ?>>
+            <<?php echo $title_tag; // phpcs:ignore WordPress.Security.EscapeOutput -- whitelisted tag ?> class="ohhol-title"><?php echo esc_html($atts['title']); ?></<?php echo $title_tag; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
         <?php endif; ?>
-        <table class="oz-spezial-tabelle">
+        <table class="ohhol-holidays-list">
+            <caption class="screen-reader-text"><?php esc_html_e('Upcoming holidays and exceptions', 'opening-hours-holidays'); ?></caption>
             <tbody>
-                <?php foreach ($kommend as $eintrag):
-                    $datum = date_i18n('l, j. F Y', strtotime($eintrag['datum']));
+                <?php foreach ($upcoming as $entry):
+                    $formatted = $entry['status'] === 'modified'
+                        ? ohhol_format_hours($entry['open1'], $entry['close1'], $entry['open2'], $entry['close2'])
+                        : '';
                 ?>
-                <tr data-datum="<?php echo esc_attr($eintrag['datum']); ?>">
-                    <td class="oz-spezial-datum"><?php echo esc_html($datum); ?></td>
-                    <td class="oz-spezial-info">
-                        <?php if ($eintrag['status'] === 'geschlossen'): ?>
-                            <span class="oz-geschlossen">Geschlossen</span>
+                <tr data-date="<?php echo esc_attr($entry['date']); ?>">
+                    <td class="ohhol-holiday-date"><?php echo esc_html(date_i18n($date_format, strtotime($entry['date']))); ?></td>
+                    <td class="ohhol-holiday-info">
+                        <?php if ($formatted !== ''): ?>
+                            <?php echo esc_html($formatted); ?>
                         <?php else: ?>
-                            <?php echo oz_format_zeiten(
-                                $eintrag['von1'], $eintrag['bis1'],
-                                $eintrag['von2'], $eintrag['bis2']
-                            ); ?>
+                            <span class="ohhol-closed"><?php esc_html_e('Closed', 'opening-hours-holidays'); ?></span>
                         <?php endif; ?>
-                        <?php if ($eintrag['bemerkung']): ?>
-                            <span class="oz-spezial-bemerkung">(<?php echo esc_html($eintrag['bemerkung']); ?>)</span>
+                        <?php if ($entry['note']): ?>
+                            <span class="ohhol-holiday-note">(<?php echo esc_html($entry['note']); ?>)</span>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -340,33 +325,28 @@ function oz_oeffnungszeiten_spezial_shortcode($atts) {
 }
 
 /**
- * Hilfsfunktion: Aufeinanderfolgende Tage mit gleichen Zeiten gruppieren
- *
- * Gibt ein Array von Gruppen zurück, z.B.:
- * [['label' => 'Mo – Fr', 'tag' => [...]], ['label' => 'Sa', 'tag' => [...]], ...]
+ * Group consecutive days with identical hours,
+ * e.g. [['label' => 'Monday – Friday', 'day' => [...]], ...].
  */
-function oz_group_tage_by_zeiten($zeiten, $wochentage) {
-    $keys   = array_keys($wochentage);
+function ohhol_group_days_by_hours($hours, $weekdays) {
+    $keys   = array_keys($weekdays);
+    $count  = count($keys);
     $groups = [];
     $i      = 0;
 
-    while ($i < count($keys)) {
-        $key     = $keys[$i];
-        $current = $zeiten[$key];
+    while ($i < $count) {
+        $current = $hours[$keys[$i]];
         $start   = $i;
 
-        while (
-            $i + 1 < count($keys) &&
-            $zeiten[$keys[$i + 1]] == $current
-        ) {
+        while ($i + 1 < $count && $hours[$keys[$i + 1]] == $current) {
             $i++;
         }
 
         $label = $start === $i
-            ? $wochentage[$keys[$start]]
-            : $wochentage[$keys[$start]] . ' – ' . $wochentage[$keys[$i]];
+            ? $weekdays[$keys[$start]]
+            : $weekdays[$keys[$start]] . ' – ' . $weekdays[$keys[$i]];
 
-        $groups[] = ['label' => $label, 'tag' => $current];
+        $groups[] = ['label' => $label, 'day' => $current];
         $i++;
     }
 
@@ -374,63 +354,53 @@ function oz_group_tage_by_zeiten($zeiten, $wochentage) {
 }
 
 /**
- * Shortcode: Kompakte Übersicht [oeffnungszeiten_kompakt]
+ * Shortcode: compact overview [opening_hours_compact]
  *
- * Geeignet für Footer/Sidebar. Fasst Tage mit gleichen Zeiten zusammen.
- *
- * Parameter:
- *   status="1"     – "Jetzt geöffnet/geschlossen" Badge anzeigen
- *   title=""       – Optionaler Titel
- *   title_tag="h3" – HTML-Tag für den Titel
+ * For footers/sidebars. Groups days with identical hours. The status badge
+ * and today's holiday note are rendered client-side (cache-safe).
  */
-function oz_oeffnungszeiten_kompakt_shortcode($atts) {
+function ohhol_shortcode_compact($atts) {
     $atts = shortcode_atts([
         'status'    => 0,
         'title'     => '',
         'title_tag' => 'h3',
-    ], $atts, 'oeffnungszeiten_kompakt');
+    ], $atts, 'opening_hours_compact');
 
-    oz_enqueue_styles();
+    ohhol_enqueue_assets();
 
-    $wochentage    = oz_get_wochentage();
-    $zeiten        = oz_get_oeffnungszeiten();
-    $optionen      = oz_get_oeffnungszeiten_optionen();
-    $heute         = current_time('Y-m-d');
-    $spezial_heute = oz_get_spezial_fuer_datum($heute);
-
-    $gruppen     = oz_group_tage_by_zeiten($zeiten, $wochentage);
-    $show_status = intval($atts['status']) || $optionen['jetzt_offen'];
-
-    $allowed_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-    $title_tag    = in_array($atts['title_tag'], $allowed_tags) ? $atts['title_tag'] : 'h3';
+    $weekdays    = ohhol_get_weekdays();
+    $hours       = ohhol_get_hours();
+    $options     = ohhol_get_options();
+    $groups      = ohhol_group_days_by_hours($hours, $weekdays);
+    $show_status = (int) $atts['status'] || $options['show_status'];
+    $title_tag   = ohhol_sanitize_title_tag($atts['title_tag'], 'h3');
 
     ob_start();
     ?>
-    <div class="oz-oeffnungszeiten-kompakt">
+    <div class="ohhol-compact">
         <?php if (!empty($atts['title'])): ?>
-            <<?php echo $title_tag; ?> class="oz-shortcode-title"><?php echo esc_html($atts['title']); ?></<?php echo $title_tag; ?>>
+            <<?php echo $title_tag; // phpcs:ignore WordPress.Security.EscapeOutput -- whitelisted tag ?> class="ohhol-title"><?php echo esc_html($atts['title']); ?></<?php echo $title_tag; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
         <?php endif; ?>
 
         <?php if ($show_status): ?>
-            <div class="oz-kompakt-status">
-                <span class="oz-status" data-oz-status></span>
-                <?php if ($spezial_heute && !empty($spezial_heute['bemerkung'])): ?>
-                    <span class="oz-heute-bemerkung">(<?php echo esc_html($spezial_heute['bemerkung']); ?>)</span>
-                <?php endif; ?>
+            <div class="ohhol-compact-status">
+                <span class="ohhol-status" data-ohhol-status role="status"></span>
+                <span class="ohhol-today-note" data-ohhol-today-note hidden></span>
             </div>
         <?php endif; ?>
 
-        <ul class="oz-kompakt-liste">
-            <?php foreach ($gruppen as $gruppe):
-                $tag = $gruppe['tag'];
+        <ul class="ohhol-compact-list">
+            <?php foreach ($groups as $group):
+                $day       = $group['day'];
+                $formatted = $day['open'] ? ohhol_format_hours($day['open1'], $day['close1'], $day['open2'], $day['close2']) : '';
             ?>
-            <li class="oz-kompakt-zeile">
-                <span class="oz-kompakt-tag"><?php echo esc_html($gruppe['label']); ?></span>
-                <span class="oz-kompakt-zeiten">
-                    <?php if ($tag['offen']): ?>
-                        <?php echo oz_format_zeiten($tag['von1'], $tag['bis1'], $tag['von2'], $tag['bis2']); ?>
+            <li class="ohhol-compact-row">
+                <span class="ohhol-compact-day"><?php echo esc_html($group['label']); ?></span>
+                <span class="ohhol-compact-hours">
+                    <?php if ($formatted !== ''): ?>
+                        <?php echo esc_html($formatted); ?>
                     <?php else: ?>
-                        <span class="oz-geschlossen">Geschlossen</span>
+                        <span class="ohhol-closed"><?php esc_html_e('Closed', 'opening-hours-holidays'); ?></span>
                     <?php endif; ?>
                 </span>
             </li>

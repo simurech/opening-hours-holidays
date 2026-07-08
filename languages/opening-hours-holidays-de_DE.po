@@ -1,0 +1,268 @@
+# German translation for Opening Hours & Holidays.
+# Copyright (C) 2026 Simon Urech
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Opening Hours & Holidays 2.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/opening-hours-holidays\n"
+"Last-Translator: Simon Urech <simon@urech.dev>\n"
+"Language-Team: German\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"POT-Creation-Date: 2026-07-08T09:58:58+00:00\n"
+"PO-Revision-Date: 2026-07-08T12:00:00+00:00\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: opening-hours-holidays\n"
+
+#. Plugin Name of the plugin
+msgid "Opening Hours & Holidays"
+msgstr "Öffnungszeiten & Feiertage"
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+msgid "https://urech.dev"
+msgstr "https://urech.dev"
+
+#. Description of the plugin
+msgid "Manage regular opening hours and holiday exceptions, display them via shortcodes and add schema.org structured data for local SEO."
+msgstr "Verwalte reguläre Öffnungszeiten und Feiertags-Ausnahmen, zeige sie per Shortcode an und ergänze strukturierte schema.org-Daten für Local SEO."
+
+#. Author of the plugin
+msgid "Simon Urech"
+msgstr "Simon Urech"
+
+msgid "Opening Hours"
+msgstr "Öffnungszeiten"
+
+msgid "Monday"
+msgstr "Montag"
+
+msgid "Tuesday"
+msgstr "Dienstag"
+
+msgid "Wednesday"
+msgstr "Mittwoch"
+
+msgid "Thursday"
+msgstr "Donnerstag"
+
+msgid "Friday"
+msgstr "Freitag"
+
+msgid "Saturday"
+msgstr "Samstag"
+
+msgid "Sunday"
+msgstr "Sonntag"
+
+msgid "Closed"
+msgstr "Geschlossen"
+
+msgid "Modified hours"
+msgstr "Geänderte Zeiten"
+
+msgid "e.g. Public holiday"
+msgstr "z. B. Feiertag"
+
+msgid "Remove entry"
+msgstr "Eintrag entfernen"
+
+msgid "Regular opening hours"
+msgstr "Reguläre Öffnungszeiten"
+
+msgid "Day"
+msgstr "Tag"
+
+msgid "Open"
+msgstr "Offen"
+
+msgid "Time window 1 (e.g. morning)"
+msgstr "Zeitfenster 1 (z. B. Vormittag)"
+
+msgid "Time window 2 (e.g. afternoon)"
+msgstr "Zeitfenster 2 (z. B. Nachmittag)"
+
+msgid "Leave empty if there is no break"
+msgstr "Leer lassen, falls keine Pause"
+
+msgid "Holidays & exceptions"
+msgstr "Feiertage & Ausnahmen"
+
+msgid "Public holidays, company holidays or deviating hours on specific dates. Entries more than 90 days in the past are removed automatically when saving."
+msgstr "Feiertage, Betriebsferien oder abweichende Zeiten für bestimmte Daten. Einträge, die mehr als 90 Tage zurückliegen, werden beim Speichern automatisch entfernt."
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Hours (if modified)"
+msgstr "Zeiten (falls geändert)"
+
+msgid "Note"
+msgstr "Bemerkung"
+
+msgid "Add entry"
+msgstr "Eintrag hinzufügen"
+
+msgid "Options"
+msgstr "Optionen"
+
+msgid "Show \"Open now\" status"
+msgstr "\"Jetzt geöffnet\"-Status anzeigen"
+
+#. translators: %s: shortcode name
+#, php-format
+msgid "Show whether the business is currently open in the %s shortcode"
+msgstr "Im Shortcode %s anzeigen, ob gerade geöffnet ist"
+
+msgid "Schema.org structured data"
+msgstr "Strukturierte Daten (schema.org)"
+
+msgid "Add LocalBusiness structured data (JSON-LD) with your opening hours to every page — helps search engines display your hours"
+msgstr "LocalBusiness-Daten (JSON-LD) mit deinen Öffnungszeiten auf jeder Seite ausgeben – hilft Suchmaschinen, deine Öffnungszeiten anzuzeigen"
+
+msgid "Business name"
+msgstr "Name des Geschäfts"
+
+msgid "Leave empty to use the site title."
+msgstr "Leer lassen, um den Titel der Website zu verwenden."
+
+msgid "Design"
+msgstr "Design"
+
+msgid "Font and primary text color are inherited from your theme. The colors below can be customized."
+msgstr "Schriftart und primäre Textfarbe werden vom Theme übernommen. Die folgenden Farben können angepasst werden."
+
+msgid "Text & table"
+msgstr "Text & Tabelle"
+
+msgid "Muted text color"
+msgstr "Gedämpfte Textfarbe"
+
+msgid "Used for times and secondary information (default: #666666)"
+msgstr "Für Uhrzeiten und Nebeninformationen (Standard: #666666)"
+
+msgid "Faint text color"
+msgstr "Sehr gedämpfte Textfarbe"
+
+msgid "Used for notes and additions in brackets (default: #999999)"
+msgstr "Für Bemerkungen und Klammerzusätze (Standard: #999999)"
+
+msgid "Zebra stripes"
+msgstr "Zebra-Streifen"
+
+msgid "Add a background color to odd rows"
+msgstr "Ungerade Zeilen farblich hinterlegen"
+
+msgid "Zebra stripe color"
+msgstr "Zebra-Streifen-Farbe"
+
+msgid "\"Today\" marker"
+msgstr "\"Heute\"-Marker"
+
+msgid "Background color"
+msgstr "Hintergrundfarbe"
+
+msgid "Text color"
+msgstr "Textfarbe"
+
+msgid "Status colors"
+msgstr "Status-Farben"
+
+msgid "\"Closed\" text color"
+msgstr "Textfarbe für \"Geschlossen\""
+
+msgid "\"Open now\" badge"
+msgstr "Badge \"Jetzt geöffnet\""
+
+msgid "Background"
+msgstr "Hintergrund"
+
+msgid "Text"
+msgstr "Text"
+
+msgid "Dot"
+msgstr "Punkt"
+
+msgid "\"Currently closed\" badge"
+msgstr "Badge \"Aktuell geschlossen\""
+
+msgid "Save settings"
+msgstr "Einstellungen speichern"
+
+msgid "Shortcode reference"
+msgstr "Shortcode-Anleitung"
+
+msgid "Weekly overview"
+msgstr "Wochenübersicht"
+
+msgid "Shows a table with all weekdays and the regular opening hours. The current day is highlighted."
+msgstr "Zeigt eine Tabelle mit allen Wochentagen und den regulären Öffnungszeiten. Der heutige Tag wird hervorgehoben."
+
+msgid "Optional title above the table"
+msgstr "Optionaler Titel über der Tabelle"
+
+msgid "HTML tag for the title (default: h2)"
+msgstr "HTML-Tag für den Titel (Standard: h2)"
+
+msgid "Today"
+msgstr "Heute"
+
+msgid "Shows only the current day. Holiday exceptions are applied automatically."
+msgstr "Zeigt nur den heutigen Tag. Feiertags-Ausnahmen werden automatisch berücksichtigt."
+
+msgid "Shows upcoming holidays and exceptions."
+msgstr "Zeigt kommende Feiertage und Ausnahmen."
+
+msgid "Only entries up to X days in the future (default: 30)"
+msgstr "Nur Einträge bis X Tage in der Zukunft (Standard: 30)"
+
+msgid "Maximum number of entries (optional)"
+msgstr "Maximale Anzahl Einträge (optional)"
+
+msgid "Optional title (only shown if there are entries)"
+msgstr "Optionaler Titel (nur sichtbar, wenn Einträge vorhanden sind)"
+
+msgid "Compact overview (footer/sidebar)"
+msgstr "Kompakte Übersicht (Footer/Sidebar)"
+
+msgid "Space-saving list. Consecutive days with identical hours are grouped automatically (e.g. \"Monday – Friday\")."
+msgstr "Platzsparende Liste. Aufeinanderfolgende Tage mit gleichen Zeiten werden automatisch zusammengefasst (z. B. \"Montag – Freitag\")."
+
+msgid "Show the \"Open now / Currently closed\" badge"
+msgstr "Badge \"Jetzt geöffnet / Aktuell geschlossen\" anzeigen"
+
+msgid "Optional title"
+msgstr "Optionaler Titel"
+
+msgid "HTML tag for the title (default: h3)"
+msgstr "HTML-Tag für den Titel (Standard: h3)"
+
+msgid "The legacy shortcodes [oeffnungszeiten], [oeffnungszeiten_heute], [oeffnungszeiten_spezial] and [oeffnungszeiten_kompakt] keep working as aliases."
+msgstr "Die bisherigen Shortcodes [oeffnungszeiten], [oeffnungszeiten_heute], [oeffnungszeiten_spezial] und [oeffnungszeiten_kompakt] funktionieren weiterhin als Aliase."
+
+msgid "Open now"
+msgstr "Jetzt geöffnet"
+
+msgid "Currently closed"
+msgstr "Aktuell geschlossen"
+
+#. translators: prefix shown before the regular hours when a holiday exception applies
+msgid "Regular:"
+msgstr "Regulär:"
+
+msgid "Weekly opening hours"
+msgstr "Wöchentliche Öffnungszeiten"
+
+#. translators: date format for holiday entries, see https://www.php.net/manual/datetime.format.php
+msgctxt "holiday date format"
+msgid "l, F j, Y"
+msgstr "l, j. F Y"
+
+msgid "Upcoming holidays and exceptions"
+msgstr "Kommende Feiertage und Ausnahmen"

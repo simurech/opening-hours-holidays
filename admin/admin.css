@@ -1,48 +1,106 @@
 /**
- * Admin Styles – Öffnungszeiten Plugin
+ * Opening Hours & Holidays – admin styles.
  */
 
-.oz-oeffnungszeiten-table .oz-time-input {
+.ohhol-hours-table .ohhol-time-input {
     width: 100px;
 }
 
-.oz-oeffnungszeiten-table td {
+.ohhol-hours-table td {
     vertical-align: middle;
 }
 
-.oz-spezial-table input[type="date"] {
+.ohhol-hours-table .ohhol-col-day {
+    width: 120px;
+}
+
+.ohhol-hours-table .ohhol-col-open {
+    width: 60px;
+}
+
+.ohhol-hours-table .ohhol-hint {
+    margin-left: 10px;
+}
+
+.ohhol-holidays-table input[type="date"] {
     width: 130px;
 }
 
-.oz-spezial-table .oz-time-input {
+.ohhol-holidays-table .ohhol-time-input {
     width: 85px;
 }
 
-.oz-spezial-table .oz-spezial-zeiten {
+.ohhol-holidays-table .ohhol-holiday-times {
     white-space: nowrap;
 }
 
-.oz-spezial-table .oz-remove-row {
+.ohhol-holidays-table .ohhol-window-sep {
+    margin: 0 5px;
+}
+
+.ohhol-holidays-table .ohhol-col-date {
+    width: 140px;
+}
+
+.ohhol-holidays-table .ohhol-col-status {
+    width: 130px;
+}
+
+.ohhol-holidays-table .ohhol-col-note {
+    width: 200px;
+}
+
+.ohhol-holidays-table .ohhol-col-remove {
+    width: 50px;
+}
+
+.ohhol-holidays-table .ohhol-remove-row {
     color: #a00;
     font-weight: bold;
     padding: 0 8px;
 }
 
-.oz-spezial-table .oz-remove-row:hover {
+.ohhol-holidays-table .ohhol-remove-row:hover {
     background: #fbeaea;
     border-color: #d63638;
 }
 
-.oz-vergangen {
+.ohhol-past {
     opacity: 0.5;
 }
 
-.oz-vergangen td::after {
-    content: ' (vergangen)';
-    color: #999;
-    font-size: 0.85em;
+.ohhol-section {
+    margin-top: 40px;
 }
 
-.oz-vergangen td:first-child::after {
-    content: '';
+.ohhol-subsection {
+    margin-top: 30px;
+}
+
+.ohhol-doc-box {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.ohhol-doc-box h3 {
+    margin-top: 25px;
+}
+
+.ohhol-doc-box h3:first-child {
+    margin-top: 0;
+}
+
+.ohhol-doc-code {
+    display: block;
+    background: #f0f0f1;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.ohhol-doc-list {
+    margin: 10px 0;
+    padding-left: 20px;
+    list-style: disc;
 }

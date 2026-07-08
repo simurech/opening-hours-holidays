@@ -1,0 +1,367 @@
+/**
+ * Opening Hours & Holidays – frontend styles.
+ *
+ * Primary text color and font are inherited from the theme.
+ * All configurable colors run through CSS custom properties
+ * which are overridden by the design settings.
+ */
+
+:root {
+    --ohhol-text-muted: #666666; /* muted text (times, secondary info) */
+    --ohhol-text-faint: #999999; /* faint text (notes) */
+    --ohhol-closed:     #c62828; /* "Closed" text color */
+    --ohhol-open-bg:    #e8f5e9; /* "Open now" badge background */
+    --ohhol-open-text:  #2e7d32; /* "Open now" badge text */
+    --ohhol-open-dot:   #4caf50; /* "Open now" badge dot */
+    --ohhol-shut-bg:    #ffebee; /* "Currently closed" badge background */
+    --ohhol-shut-text:  #c62828; /* "Currently closed" badge text */
+    --ohhol-shut-dot:   #f44336; /* "Currently closed" badge dot */
+    --ohhol-today-bg:   #000000; /* "Today" marker background */
+    --ohhol-today-text: #ffffff; /* "Today" marker text */
+}
+
+/* Fallback for themes that don't define .screen-reader-text */
+.ohhol-week caption.screen-reader-text,
+.ohhol-holidays caption.screen-reader-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Hide empty p tags wpautop leaves around shortcodes */
+.ohhol-week + p:empty,
+.ohhol-today + p:empty,
+.ohhol-holidays + p:empty {
+    display: none;
+    margin: 0;
+    padding: 0;
+    height: 0;
+    line-height: 0;
+}
+
+p:has(+ .ohhol-week),
+p:has(+ .ohhol-today),
+p:has(+ .ohhol-holidays) {
+    margin: 0;
+    padding: 0;
+    height: 0;
+    line-height: 0;
+    font-size: 0;
+}
+
+/* Weekly overview */
+.ohhol-week {
+    margin: 0 0 20px 0;
+}
+
+.ohhol-title {
+    margin: 0 0 15px 0;
+    padding: 0;
+    line-height: 1.3;
+}
+
+.ohhol-week-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: none !important;
+}
+
+.ohhol-week-table tbody,
+.ohhol-week-table tr {
+    border: none !important;
+}
+
+.ohhol-week-table th,
+.ohhol-week-table td {
+    padding: 12px 15px;
+    vertical-align: middle;
+    border: none !important;
+}
+
+/* Day name inherits the theme text color */
+.ohhol-day-name {
+    font-weight: 500;
+    width: 40%;
+    font-size: 1em;
+    white-space: nowrap;
+    text-align: left;
+    background: transparent;
+}
+
+/* Times in muted color */
+.ohhol-day-hours {
+    text-align: right;
+    font-size: 0.95em;
+    color: var(--ohhol-text-muted);
+}
+
+/* Today: stronger weight, color inherited from theme */
+.ohhol-week-table tr.ohhol-today-row .ohhol-day-name {
+    font-weight: 600;
+}
+
+.ohhol-week-table tr.ohhol-today-row .ohhol-day-hours {
+    font-weight: 500;
+    color: inherit;
+}
+
+.ohhol-today-marker {
+    display: inline-block;
+    font-size: 0.7em;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: var(--ohhol-today-bg);
+    color: var(--ohhol-today-text);
+}
+
+/* Holiday overlay in the weekly table */
+.ohhol-holiday-line {
+    display: block;
+}
+
+.ohhol-regular-line {
+    display: block;
+    font-size: 0.85em;
+    color: var(--ohhol-text-muted);
+    margin-top: 4px;
+}
+
+.ohhol-note-inline {
+    display: inline-block;
+    font-size: 0.85em;
+    color: var(--ohhol-text-faint);
+    font-style: italic;
+    margin-left: 6px;
+}
+
+/* Closed */
+.ohhol-closed {
+    color: var(--ohhol-closed);
+    font-weight: 500;
+}
+
+/* Today shortcode */
+.ohhol-today {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 20px 0;
+}
+
+.ohhol-today-day {
+    font-weight: 600;
+    font-size: 1em;
+}
+
+.ohhol-today-hours {
+    font-weight: 400;
+    color: var(--ohhol-text-muted);
+}
+
+.ohhol-today-note {
+    color: var(--ohhol-text-faint);
+    font-size: 0.9em;
+}
+
+/* Status badge */
+.ohhol-status {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8em;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 3px;
+    margin-left: 8px;
+}
+
+.ohhol-status::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.ohhol-status.ohhol-open {
+    background: var(--ohhol-open-bg);
+    color: var(--ohhol-open-text);
+}
+
+.ohhol-status.ohhol-open::before {
+    background: var(--ohhol-open-dot);
+}
+
+.ohhol-status.ohhol-shut {
+    background: var(--ohhol-shut-bg);
+    color: var(--ohhol-shut-text);
+}
+
+.ohhol-status.ohhol-shut::before {
+    background: var(--ohhol-shut-dot);
+}
+
+/* Holidays list */
+.ohhol-holidays {
+    margin: 0 0 20px 0;
+}
+
+.ohhol-holidays-list {
+    width: 100%;
+    border-collapse: collapse;
+    border: none !important;
+}
+
+.ohhol-holidays-list tbody,
+.ohhol-holidays-list tr {
+    border: none !important;
+}
+
+.ohhol-holidays-list td {
+    padding: 12px 15px;
+    vertical-align: middle;
+    border: none !important;
+}
+
+/* Date inherits the theme text color */
+.ohhol-holiday-date {
+    font-weight: 500;
+    font-size: 0.95em;
+    width: 50%;
+}
+
+.ohhol-holiday-info {
+    text-align: right;
+    color: var(--ohhol-text-muted);
+    font-size: 0.95em;
+}
+
+.ohhol-holiday-note {
+    color: var(--ohhol-text-faint);
+    font-size: 0.85em;
+    margin-left: 8px;
+}
+
+/* Zebra stripes (activated via inline CSS when configured) */
+.ohhol-week-table tr:nth-child(odd),
+.ohhol-holidays-list tr:nth-child(odd) {
+    background-color: transparent;
+}
+
+/* Compact variant (footer/sidebar) */
+.ohhol-compact {
+    margin: 0 0 20px 0;
+}
+
+.ohhol-compact .ohhol-title {
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+
+.ohhol-compact-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.ohhol-compact-status .ohhol-status {
+    margin-left: 0;
+}
+
+.ohhol-compact-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ohhol-compact-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    padding: 3px 0;
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+.ohhol-compact-day {
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.ohhol-compact-hours {
+    color: var(--ohhol-text-muted);
+    text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .ohhol-week-table th,
+    .ohhol-week-table td {
+        font-size: 0.9em;
+    }
+
+    .ohhol-today-marker {
+        font-size: 0.65em;
+        padding: 2px 5px;
+        margin-left: 5px;
+    }
+
+    .ohhol-regular-line {
+        font-size: 0.8em;
+    }
+
+    .ohhol-today {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ohhol-status {
+        margin-left: 0;
+        margin-top: 5px;
+    }
+
+    .ohhol-holidays-list td {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 8px 15px;
+    }
+
+    .ohhol-holidays-list tr td:first-child {
+        padding-bottom: 4px;
+        padding-top: 12px;
+    }
+
+    .ohhol-holidays-list tr td:last-child {
+        padding-top: 0;
+        padding-bottom: 12px;
+    }
+
+    .ohhol-holiday-date {
+        width: 100%;
+        font-weight: 600;
+    }
+
+    .ohhol-holiday-info {
+        text-align: left;
+    }
+
+    .ohhol-holiday-note {
+        display: block;
+        margin-left: 0;
+        margin-top: 2px;
+    }
+}
