@@ -5,7 +5,7 @@
 [![Stable Tag](https://img.shields.io/badge/stable-2.0.0-blue.svg)](https://github.com/simurech/opening-hours-holidays/releases)
 [![WordPress](https://img.shields.io/badge/WordPress-5.8%2B-21759b.svg)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-8892be.svg)](https://php.net/)
-[![License](https://img.shields.io/badge/License-GPLv2--or--later-green.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
+[![Lizenz](https://img.shields.io/badge/Lizenz-GPL--2.0--or--later-green.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 
 > Öffnungszeiten und Feiertage einmal im Backend pflegen, per Shortcode überall auf der Website anzeigen — mit korrekter Zeitzonen-Behandlung, Cache-Kompatibilität und optionalen schema.org-Strukturdaten für lokale Suchmaschinen.
 
@@ -76,6 +76,6 @@ add_filter('ohhol_schema_data', function ($schema) {
 
 ## Lizenz
 
-GPLv2 oder später – siehe [gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html).
+GPL-2.0-or-later – siehe [gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html).
 
 **Autor:** Simon Urech — [@simurech](https://github.com/simurech)

@@ -9,7 +9,7 @@
  * Requires PHP:      7.4
  * Author:            Simon Urech
  * Author URI:        https://urech.dev
- * License:           GPLv2 or later
+ * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       opening-hours-holidays
  * Domain Path:       /languages
