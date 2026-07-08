@@ -1,35 +1,68 @@
 # Opening Hours & Holidays
 
-WordPress plugin to manage regular opening hours and holiday exceptions, display them via shortcodes and add schema.org structured data for local SEO.
+**Öffnungszeiten und Feiertags-Ausnahmen verwalten und per Shortcode anzeigen — inklusive schema.org-Daten fürs lokale SEO.**
 
-Formerly known as "Öffnungszeiten Plugin" — settings from version 1.x are migrated automatically and the old German shortcodes keep working as aliases.
+[![Stable Tag](https://img.shields.io/badge/stable-2.0.0-blue.svg)](https://github.com/simurech/opening-hours-holidays/releases)
+[![WordPress](https://img.shields.io/badge/WordPress-5.8%2B-21759b.svg)](https://wordpress.org/)
+[![PHP](https://img.shields.io/badge/PHP-7.4%2B-8892be.svg)](https://php.net/)
+[![License](https://img.shields.io/badge/License-GPLv2--or--later-green.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 
-## Features
+> Öffnungszeiten und Feiertage einmal im Backend pflegen, per Shortcode überall auf der Website anzeigen — mit korrekter Zeitzonen-Behandlung, Cache-Kompatibilität und optionalen schema.org-Strukturdaten für lokale Suchmaschinen.
 
-- Regular opening hours per weekday (up to two time windows per day)
-- Holiday exceptions: closed days or modified hours for specific dates
-- Four shortcodes for different layouts
-- "Open now / Currently closed" badge
-- Compatible with full-page caching (LiteSpeed, WP Rocket etc.)
-- Correct time zone handling — also for international visitors
-- Optional schema.org LocalBusiness JSON-LD output
-- Customizable design (colors, zebra stripes, badges)
-- Fully translatable; German translation bundled
+**→ Plugin auf WordPress.org (in Vorbereitung)** — Einreichung ist vorbereitet, aber noch nicht freigegeben.
+
+Ehemals bekannt als „Öffnungszeiten Plugin" — Einstellungen aus Version 1.x werden automatisch migriert, die alten deutschen Shortcodes funktionieren als Aliase weiter.
+
+---
+
+## Funktionen
+
+- Reguläre Öffnungszeiten pro Wochentag (bis zu zwei Zeitfenster pro Tag)
+- Feiertags-Ausnahmen: geschlossene Tage oder angepasste Zeiten für bestimmte Daten
+- Vier Shortcodes für unterschiedliche Layouts
+- „Jetzt geöffnet / Aktuell geschlossen"-Badge
+- Kompatibel mit Full-Page-Caching (LiteSpeed, WP Rocket etc.)
+- Korrekte Zeitzonen-Behandlung — auch für internationale Besucher
+- Optionale schema.org-LocalBusiness-Ausgabe (JSON-LD)
+- Anpassbares Design (Farben, Zebra-Streifen, Badges)
+- Vollständig übersetzbar; deutsche Übersetzung mitgeliefert
+
+---
 
 ## Shortcodes
 
-| Shortcode | Purpose | Attributes |
-|-----------|---------|------------|
-| `[opening_hours]` | Weekly table, today highlighted | `title`, `title_tag` |
-| `[opening_hours_today]` | Today's hours with optional status badge | – |
-| `[opening_hours_holidays]` | Upcoming holidays/exceptions | `days` (30), `limit`, `title`, `title_tag` |
-| `[opening_hours_compact]` | Compact list for footer/sidebar, equal days grouped | `status`, `title`, `title_tag` |
+| Shortcode | Zweck | Attribute |
+|-----------|-------|-----------|
+| `[opening_hours]` | Wochentabelle, heutiger Tag hervorgehoben | `title`, `title_tag` |
+| `[opening_hours_today]` | Heutige Öffnungszeiten mit optionalem Status-Badge | – |
+| `[opening_hours_holidays]` | Kommende Feiertage/Ausnahmen | `days` (30), `limit`, `title`, `title_tag` |
+| `[opening_hours_compact]` | Kompakte Liste für Footer/Sidebar, gleiche Tage gruppiert | `status`, `title`, `title_tag` |
 
-Legacy aliases: `[oeffnungszeiten]`, `[oeffnungszeiten_heute]`, `[oeffnungszeiten_spezial]` (incl. `tage` attribute), `[oeffnungszeiten_kompakt]`.
+Legacy-Aliase: `[oeffnungszeiten]`, `[oeffnungszeiten_heute]`, `[oeffnungszeiten_spezial]` (inkl. `tage`-Attribut), `[oeffnungszeiten_kompakt]`.
 
-## Developers
+---
 
-Extend the schema.org output via the `ohhol_schema_data` filter:
+## Systemanforderungen
+
+| Komponente | Minimum |
+|---|---|
+| WordPress | 5.8 |
+| PHP | 7.4 |
+
+---
+
+## Installation
+
+1. Den Ordner nach `wp-content/plugins/` hochladen oder über den Plugin-Bildschirm installieren.
+2. Das Plugin aktivieren.
+3. Öffnungszeiten unter dem Menüpunkt **Opening Hours** konfigurieren.
+4. Shortcodes in Seiten, Beiträge oder Widgets einfügen.
+
+---
+
+## Für Entwickler
+
+Die schema.org-Ausgabe lässt sich per `ohhol_schema_data`-Filter erweitern:
 
 ```php
 add_filter('ohhol_schema_data', function ($schema) {
@@ -39,11 +72,10 @@ add_filter('ohhol_schema_data', function ($schema) {
 });
 ```
 
-## Requirements
+---
 
-- WordPress 5.8+
-- PHP 7.4+
+## Lizenz
 
-## License
+GPLv2 oder später – siehe [gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html).
 
-GPLv2 or later. See `readme.txt` for the full plugin directory readme.
+**Autor:** Simon Urech — [@simurech](https://github.com/simurech)

@@ -12,7 +12,7 @@ Manage regular opening hours and holiday exceptions, display them via shortcodes
 
 == Description ==
 
-Opening Hours & Holidays lets you manage your business hours in one place and display them anywhere on your site.
+Copying opening hours into your theme's footer, then updating them by hand every holiday season, gets tedious fast. Opening Hours & Holidays lets you manage your business hours in one place and display them anywhere on your site — with correct time zone handling, cache compatibility, and optional schema.org structured data for local search visibility.
 
 **Features**
 
@@ -60,6 +60,14 @@ Add an entry under "Holidays & exceptions" with the date, choose "Closed" or "Mo
 = Does the plugin add structured data? =
 
 Optionally, yes. Enable "Schema.org structured data" in the settings and the plugin outputs a LocalBusiness JSON-LD block with your regular hours and upcoming exceptions.
+
+= Can I manage opening hours for more than one location? =
+
+Not currently. The plugin manages a single set of opening hours and holidays per site.
+
+= Is there a Pro version with more features? =
+
+No, this plugin is free and self-contained. There are no paid upgrades or premium add-ons.
 
 == Screenshots ==
 
