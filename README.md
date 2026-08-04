@@ -78,4 +78,4 @@ add_filter('ohhol_schema_data', function ($schema) {
 
 GPL-2.0-or-later – siehe [gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html).
 
-**Autor:** Simon Urech — [@simurech](https://github.com/simurech)
+**Autor:** Pulacha Labs — [@simurech](https://github.com/simurech)

@@ -1,11 +1,11 @@
 # German translation for Opening Hours & Holidays.
-# Copyright (C) 2026 Simon Urech
-# This file is distributed under the GPLv2 or later.
+# Copyright (C) 2026 Pulacha Labs
+# This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
 "Project-Id-Version: Opening Hours & Holidays 2.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/opening-hours-holidays\n"
-"Last-Translator: Simon Urech <simon@urech.dev>\n"
+"Last-Translator: Pulacha Labs\n"
 "Language-Team: German\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
@@ -23,16 +23,16 @@ msgstr "Öffnungszeiten & Feiertage"
 
 #. Plugin URI of the plugin
 #. Author URI of the plugin
-msgid "https://urech.dev"
-msgstr "https://urech.dev"
+msgid "https://pulacha-labs.ch/"
+msgstr "https://pulacha-labs.ch/"
 
 #. Description of the plugin
 msgid "Manage regular opening hours and holiday exceptions, display them via shortcodes and add schema.org structured data for local SEO."
 msgstr "Verwalte reguläre Öffnungszeiten und Feiertags-Ausnahmen, zeige sie per Shortcode an und ergänze strukturierte schema.org-Daten für Local SEO."
 
 #. Author of the plugin
-msgid "Simon Urech"
-msgstr "Simon Urech"
+msgid "Pulacha Labs"
+msgstr "Pulacha Labs"
 
 msgid "Opening Hours"
 msgstr "Öffnungszeiten"
