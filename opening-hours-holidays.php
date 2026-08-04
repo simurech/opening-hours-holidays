@@ -28,14 +28,6 @@ require_once OHHOL_PATH . 'includes/shortcodes.php';
 require_once OHHOL_PATH . 'includes/schema.php';
 
 /**
- * Load translations bundled with the plugin.
- */
-function ohhol_load_textdomain() {
-    load_plugin_textdomain('opening-hours-holidays', false, dirname(plugin_basename(__FILE__)) . '/languages');
-}
-add_action('init', 'ohhol_load_textdomain');
-
-/**
  * Admin assets (settings page only).
  */
 function ohhol_admin_assets($hook) {
