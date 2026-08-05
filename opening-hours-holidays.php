@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Opening Hours & Holidays
- * Plugin URI:        https://pulacha-labs.ch/
+ * Plugin URI:        https://pulacha-labs.ch/plugins/opening-hours/
  * Description:       Manage regular opening hours and holiday exceptions, display them via shortcodes and add schema.org structured data for local SEO.
  * Version:           2.0.1
  * Requires at least: 5.8

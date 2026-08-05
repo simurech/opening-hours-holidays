@@ -3,6 +3,7 @@
 .gitignore
 .distignore
 .claude
+CLAUDE.md
 README.md
 build
 *.zip
