@@ -4,7 +4,7 @@ Tags: opening hours, business hours, holidays, local seo, shortcode
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,6 +76,9 @@ No, this plugin is free and self-contained. There are no paid upgrades or premiu
 3. Compact list with status badge
 
 == Changelog ==
+
+= 2.0.2 =
+* Hardened JSON-LD output escaping to prevent script-tag breakout via the business name
 
 = 2.0.1 =
 * Release pipeline now builds and attaches a ready-to-submit plugin ZIP to each GitHub release
