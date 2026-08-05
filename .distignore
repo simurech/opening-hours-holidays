@@ -1,0 +1,9 @@
+.git
+.github
+.gitignore
+.distignore
+.claude
+README.md
+build
+*.zip
+.DS_Store

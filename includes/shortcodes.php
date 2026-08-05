@@ -112,6 +112,7 @@ function ohhol_enqueue_assets() {
  * All values are validated hex colors (see ohhol_sanitize_design()).
  */
 function ohhol_generate_inline_styles($design) {
+    $defaults = ohhol_get_design_defaults();
     $vars = [
         '--ohhol-today-bg'    => $design['today_bg'],
         '--ohhol-today-text'  => $design['today_text'],
@@ -125,17 +126,30 @@ function ohhol_generate_inline_styles($design) {
         '--ohhol-shut-text'   => $design['closed_text'],
         '--ohhol-shut-dot'    => $design['closed_dot'],
     ];
+    $default_map = [
+        '--ohhol-today-bg'    => $defaults['today_bg'],
+        '--ohhol-today-text'  => $defaults['today_text'],
+        '--ohhol-text-muted'  => $defaults['text_muted'],
+        '--ohhol-text-faint'  => $defaults['text_faint'],
+        '--ohhol-closed'      => $defaults['closed_color'],
+        '--ohhol-open-bg'     => $defaults['open_bg'],
+        '--ohhol-open-text'   => $defaults['open_text'],
+        '--ohhol-open-dot'    => $defaults['open_dot'],
+        '--ohhol-shut-bg'     => $defaults['closed_bg'],
+        '--ohhol-shut-text'   => $defaults['closed_text'],
+        '--ohhol-shut-dot'    => $defaults['closed_dot'],
+    ];
 
     $css = ':root {';
     foreach ($vars as $prop => $value) {
-        $css .= ' ' . $prop . ': ' . sanitize_hex_color($value) . ';';
+        $css .= ' ' . $prop . ': ' . (sanitize_hex_color($value) ?: $default_map[$prop]) . ';';
     }
     $css .= ' }';
 
     if (!empty($design['zebra_enabled'])) {
         $css .= sprintf(
             ' .ohhol-week-table tr:nth-child(odd), .ohhol-holidays-list tr:nth-child(odd) { background-color: %s; }',
-            sanitize_hex_color($design['zebra_color'])
+            sanitize_hex_color($design['zebra_color']) ?: $defaults['zebra_color']
         );
     }
 

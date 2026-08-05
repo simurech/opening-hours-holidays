@@ -4,7 +4,7 @@ Tags: opening hours, business hours, holidays, local seo, shortcode
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,6 +76,12 @@ No, this plugin is free and self-contained. There are no paid upgrades or premiu
 3. Compact list with status badge
 
 == Changelog ==
+
+= 2.0.1 =
+* Release pipeline now builds and attaches a ready-to-submit plugin ZIP to each GitHub release
+* Added bundled LICENSE file (GPL-2.0-or-later)
+* Defensive fallback for design colors in case a stored value is invalid
+* Added index.php stub files to plugin subdirectories
 
 = 2.0.0 =
 * Plugin renamed to "Opening Hours & Holidays", ready for the WordPress.org plugin directory

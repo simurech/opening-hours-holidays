@@ -2,7 +2,7 @@
 
 **Öffnungszeiten und Feiertags-Ausnahmen verwalten und per Shortcode anzeigen — inklusive schema.org-Daten fürs lokale SEO.**
 
-[![Stable Tag](https://img.shields.io/badge/stable-2.0.0-blue.svg)](https://github.com/simurech/opening-hours-holidays/releases)
+[![Stable Tag](https://img.shields.io/badge/stable-2.0.1-blue.svg)](https://github.com/simurech/opening-hours-holidays/releases)
 [![WordPress](https://img.shields.io/badge/WordPress-5.8%2B-21759b.svg)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-8892be.svg)](https://php.net/)
 [![Lizenz](https://img.shields.io/badge/Lizenz-GPL--2.0--or--later-green.svg)](https://www.gnu.org/licenses/gpl-2.0.html)

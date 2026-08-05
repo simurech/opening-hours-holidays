@@ -33,11 +33,20 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Plugin-ZIP bauen
+        if: steps.tag_check.outputs.exists == 'false'
+        run: |
+          SLUG=opening-hours-holidays
+          mkdir -p "build/$SLUG"
+          rsync -a --exclude-from='.distignore' ./ "build/$SLUG/"
+          (cd build && zip -r "../$SLUG-${{ steps.version.outputs.version }}.zip" "$SLUG")
+
       - name: Release erstellen
         if: steps.tag_check.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ steps.version.outputs.tag }}" \
+            "opening-hours-holidays-${{ steps.version.outputs.version }}.zip" \
             --title "${{ steps.version.outputs.tag }}" \
             --latest
