@@ -3,8 +3,8 @@ Contributors: simon61
 Tags: opening hours, business hours, holidays, local seo, shortcode
 Requires at least: 5.8
 Tested up to: 7.1
-Requires PHP: 7.4
-Stable tag: 2.0.3
+Requires PHP: 8.3
+Stable tag: 2.0.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,9 @@ No, this plugin is free and self-contained. There are no paid upgrades or premiu
 
 == Changelog ==
 
+= 2.0.4 =
+* Minimum PHP version raised to 8.3 (older PHP versions no longer receive security fixes)
+
 = 2.0.3 =
 * Confirmed compatibility with WordPress 7.1
 
@@ -110,6 +113,9 @@ No, this plugin is free and self-contained. There are no paid upgrades or premiu
 * Today marker and status badge rendered via JavaScript (caching-compatible), business time zone used instead of the visitor's local time
 
 == Upgrade Notice ==
+
+= 2.0.4 =
+Requires PHP 8.3 or higher. Sites on older PHP versions keep the current version until PHP is updated.
 
 = 2.0.0 =
 Major update: plugin renamed, English interface with bundled German translation, schema.org support. Your existing settings and shortcodes keep working.
