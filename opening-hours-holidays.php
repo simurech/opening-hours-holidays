@@ -5,7 +5,6 @@
  * Description:       Manage regular opening hours and holiday exceptions, display them via shortcodes and add schema.org structured data for local SEO.
  * Version:           2.0.4
  * Requires at least: 5.8
- * Tested up to:      7.1
  * Requires PHP:      8.3
  * Author:            Pulacha Labs
  * Author URI:        https://pulacha-labs.ch/
