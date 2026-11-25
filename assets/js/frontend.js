@@ -85,19 +85,35 @@
         return (day && parseInt(day.open, 10)) ? pairs(day) : [];
     }
 
-    function isOpenNow(now) {
-        const t = now.time;
+    function toMinutes(hm) {
+        return parseInt(hm.slice(0, 2), 10) * 60 + parseInt(hm.slice(3, 5), 10);
+    }
 
-        // Windows starting today; a closing time <= opening time runs past midnight.
-        const today = windowsFor(now.date).some(([open, close]) =>
-            close > open ? (t >= open && t < close) : t >= open
-        );
-        if (today) return true;
+    /**
+     * Open state and minutes until the next change.
+     * Windows of yesterday, today and tomorrow are turned into minute intervals
+     * relative to today 00:00; a closing time <= opening time runs past midnight.
+     */
+    function getStatus(now) {
+        const t = toMinutes(now.time);
+        const status = { open: false, closesIn: null, opensIn: null };
 
-        // Overnight windows from yesterday that are still running.
-        return windowsFor(addDays(now.date, -1)).some(([open, close]) =>
-            close <= open && close !== '00:00' && t < close
-        );
+        [-1, 0, 1].forEach(offset => {
+            windowsFor(addDays(now.date, offset)).forEach(([o, c]) => {
+                const open = toMinutes(o) + offset * 1440;
+                let close  = toMinutes(c) + offset * 1440;
+                if (close <= open) close += 1440;
+
+                if (t >= open && t < close) {
+                    status.open = true;
+                    status.closesIn = Math.max(status.closesIn || 0, close - t);
+                } else if (open > t) {
+                    status.opensIn = status.opensIn === null ? open - t : Math.min(status.opensIn, open - t);
+                }
+            });
+        });
+
+        return status;
     }
 
     // Build "<hours or Closed> (note)" content into an element.
@@ -233,8 +249,9 @@
 
             let visible = 0;
             container.querySelectorAll('tbody tr[data-date]').forEach(row => {
-                const d    = row.dataset.date;
-                const hide = d < now.date || d > maxDate || (limit > 0 && visible >= limit);
+                const start = row.dataset.date;
+                const end   = row.dataset.end || start;
+                const hide  = end < now.date || start > maxDate || (limit > 0 && visible >= limit);
                 row.hidden = hide;
                 if (!hide) visible++;
             });
@@ -251,8 +268,20 @@
             el.hidden = !note;
         });
 
-        const open = isOpenNow(now);
-        const text = open ? (i18n.openNow || 'Open now') : (i18n.closedNow || 'Currently closed');
+        const status = getStatus(now);
+        const open   = status.open;
+        const soon   = parseInt(data.soon, 10) || 0;
+        const isSoon = soon > 0 && (open
+            ? status.closesIn !== null && status.closesIn <= soon
+            : status.opensIn !== null && status.opensIn <= soon);
+
+        let text;
+        if (open) {
+            text = isSoon ? (i18n.closesSoon || 'Closes soon') : (i18n.openNow || 'Open now');
+        } else {
+            text = isSoon ? (i18n.opensSoon || 'Opens soon') : (i18n.closedNow || 'Currently closed');
+        }
+
         document.querySelectorAll('[data-ohhol-status]').forEach(badge => {
             // Only touch the live region when something changed (avoids repeated announcements).
             if (badge.textContent !== text) {
@@ -260,6 +289,12 @@
             }
             badge.classList.toggle('ohhol-open', open);
             badge.classList.toggle('ohhol-shut', !open);
+            badge.classList.toggle('ohhol-soon', isSoon);
+        });
+
+        // [opening_hours_if_open] / [opening_hours_if_closed]
+        document.querySelectorAll('[data-ohhol-if]').forEach(el => {
+            el.hidden = (el.dataset.ohholIf === 'open') !== open;
         });
     }
 

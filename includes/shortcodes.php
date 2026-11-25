@@ -21,6 +21,8 @@ function ohhol_get_shortcode_tags(): array {
         'oeffnungszeiten_heute'   => 'ohhol_shortcode_today',
         'oeffnungszeiten_spezial' => 'ohhol_shortcode_holidays',
         'oeffnungszeiten_kompakt' => 'ohhol_shortcode_compact',
+        'opening_hours_if_open'   => 'ohhol_shortcode_if_open',
+        'opening_hours_if_closed' => 'ohhol_shortcode_if_closed',
     ];
 }
 
@@ -82,18 +84,6 @@ function ohhol_get_weekday_key($php_day): string {
 }
 
 /**
- * Get the holiday entry for a specific date (Y-m-d) or null.
- */
-function ohhol_get_holiday_for_date(string $date): ?array {
-    foreach (ohhol_get_holidays() as $entry) {
-        if ($entry['date'] === $date) {
-            return $entry;
-        }
-    }
-    return null;
-}
-
-/**
  * Validate a title tag attribute against a whitelist.
  */
 function ohhol_sanitize_title_tag($tag, string $default = 'h2'): string {
@@ -125,6 +115,10 @@ function ohhol_maybe_enqueue_early(): void {
     if (!$post || $post->post_content === '') {
         return;
     }
+    if (has_block('ohhol/opening-hours', $post)) {
+        ohhol_enqueue_assets();
+        return;
+    }
     foreach (array_keys(ohhol_get_shortcode_tags()) as $tag) {
         if (has_shortcode($post->post_content, $tag)) {
             ohhol_enqueue_assets();
@@ -138,8 +132,9 @@ add_action('wp_enqueue_scripts', 'ohhol_maybe_enqueue_early', 20);
  * Data passed to the frontend script.
  */
 function ohhol_get_frontend_data(): array {
-    $tz_now    = new DateTime('now', wp_timezone());
-    $yesterday = wp_date('Y-m-d', time() - DAY_IN_SECONDS);
+    $tz_now  = new DateTime('now', wp_timezone());
+    $today   = ohhol_today();
+    $options = ohhol_get_options();
 
     $regular = [];
     foreach (ohhol_get_hours() as $key => $day) {
@@ -147,16 +142,22 @@ function ohhol_get_frontend_data(): array {
         $regular[$key] = $day;
     }
 
+    // One entry per day (ranges and yearly entries expanded). Yesterday is included
+    // for overnight windows that end today; one year ahead covers long-lived page caches.
     $holidays = [];
-    foreach (ohhol_get_holidays() as $entry) {
-        // Yesterday is included for overnight windows that end today.
-        if ($entry['date'] < $yesterday) {
-            continue;
-        }
-        $entry['text'] = $entry['status'] === 'modified'
-            ? ohhol_format_hours($entry['open1'], $entry['close1'], $entry['open2'], $entry['close2'])
-            : '';
-        $holidays[] = $entry;
+    foreach (ohhol_get_holiday_days(ohhol_add_days($today, -1), ohhol_add_days($today, 400)) as $date => $entry) {
+        $holidays[] = [
+            'date'   => $date,
+            'status' => $entry['status'],
+            'open1'  => $entry['open1'],
+            'close1' => $entry['close1'],
+            'open2'  => $entry['open2'],
+            'close2' => $entry['close2'],
+            'note'   => $entry['note'],
+            'text'   => $entry['status'] === 'modified'
+                ? ohhol_format_hours($entry['open1'], $entry['close1'], $entry['open2'], $entry['close2'])
+                : '',
+        ];
     }
 
     return [
@@ -165,7 +166,10 @@ function ohhol_get_frontend_data(): array {
         'weekdays'   => ohhol_get_weekdays(),
         'timezone'   => wp_timezone_string(),
         'utc_offset' => (int) ($tz_now->getOffset() / 60),
+        'soon'       => (int) $options['soon_minutes'],
         'i18n'       => [
+            'closesSoon' => __('Closes soon', 'opening-hours-holidays'),
+            'opensSoon'  => __('Opens soon', 'opening-hours-holidays'),
             'closed'    => __('Closed', 'opening-hours-holidays'),
             'openNow'   => __('Open now', 'opening-hours-holidays'),
             'closedNow' => __('Currently closed', 'opening-hours-holidays'),
@@ -302,6 +306,7 @@ function ohhol_shortcode_week($atts): string {
  * never shows a stale day. A server-rendered fallback lives in <noscript>.
  */
 function ohhol_shortcode_today($atts): string {
+    $atts = shortcode_atts(['status' => null], $atts, 'opening_hours_today');
     ohhol_enqueue_assets();
 
     $weekdays   = ohhol_get_weekdays();
@@ -325,12 +330,29 @@ function ohhol_shortcode_today($atts): string {
             $hours_text = ohhol_format_hours($day['open1'], $day['close1'], $day['open2'], $day['close2']);
         }
     }
-    $is_closed = ($hours_text === '');
+    $is_closed   = ($hours_text === '');
+    $show_status = $atts['status'] === null ? (bool) $options['show_status'] : (bool) (int) $atts['status'];
+
+    // Block editor preview (REST): no frontend script runs there, so render server-side.
+    if (ohhol_is_editor_preview()) {
+        ob_start();
+        ?>
+        <div class="ohhol-today">
+            <span class="ohhol-today-day"><?php echo esc_html($day_label); ?>:</span>
+            <span class="ohhol-today-hours <?php echo $is_closed ? 'ohhol-closed' : ''; ?>"><?php echo $is_closed ? esc_html__('Closed', 'opening-hours-holidays') : esc_html($hours_text); ?></span>
+            <?php if ($note): ?>
+                <span class="ohhol-today-note">(<?php echo esc_html($note); ?>)</span>
+            <?php endif; ?>
+            <?php if ($show_status) { echo ohhol_render_status_preview(); } // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in ohhol_render_status_preview() ?>
+        </div>
+        <?php
+        return (string) ob_get_clean();
+    }
 
     ob_start();
     ?>
     <div class="ohhol-today" data-ohhol-today>
-        <?php if ($options['show_status']): ?>
+        <?php if ($show_status): ?>
             <span class="ohhol-status" data-ohhol-status role="status"></span>
         <?php endif; ?>
     </div>
@@ -381,10 +403,9 @@ function ohhol_shortcode_holidays($atts): string {
         $atts['days'] = $atts['tage'];
     }
 
-    $today    = current_time('Y-m-d');
-    $upcoming = array_filter(ohhol_get_holidays(), static function ($e) use ($today) {
-        return $e['date'] >= $today;
-    });
+    $today    = ohhol_today();
+    $horizon  = ohhol_add_days($today, max(400, (int) $atts['days'] + 31));
+    $upcoming = ohhol_get_holiday_occurrences($today, $horizon);
 
     if (empty($upcoming)) {
         return '';
@@ -394,6 +415,9 @@ function ohhol_shortcode_holidays($atts): string {
 
     /* translators: date format for holiday entries, see https://www.php.net/manual/datetime.format.php */
     $date_format = _x('l, F j, Y', 'holiday date format', 'opening-hours-holidays');
+    $preview     = ohhol_is_editor_preview();
+    $days_limit  = ohhol_add_days($today, (int) $atts['days']);
+    $shown       = 0;
 
     ob_start();
     ?>
@@ -405,13 +429,23 @@ function ohhol_shortcode_holidays($atts): string {
         <table class="ohhol-holidays-list">
             <caption class="screen-reader-text"><?php esc_html_e('Upcoming holidays and exceptions', 'opening-hours-holidays'); ?></caption>
             <tbody>
-                <?php foreach ($upcoming as $entry):
+                <?php foreach ($upcoming as $occ):
+                    $entry     = $occ['entry'];
                     $formatted = $entry['status'] === 'modified'
                         ? ohhol_format_hours($entry['open1'], $entry['close1'], $entry['open2'], $entry['close2'])
                         : '';
+                    $label     = ohhol_format_date($occ['start'], $date_format);
+                    if ($occ['end'] !== $occ['start']) {
+                        $label .= ' – ' . ohhol_format_date($occ['end'], $date_format);
+                    }
+                    // In the editor preview, apply the days/limit filter server-side.
+                    $hidden = $preview && ($occ['start'] > $days_limit || ((int) $atts['limit'] > 0 && $shown >= (int) $atts['limit']));
+                    if (!$hidden) {
+                        $shown++;
+                    }
                 ?>
-                <tr data-date="<?php echo esc_attr($entry['date']); ?>">
-                    <td class="ohhol-holiday-date"><?php echo esc_html(ohhol_format_date($entry['date'], $date_format)); ?></td>
+                <tr data-date="<?php echo esc_attr($occ['start']); ?>" data-end="<?php echo esc_attr($occ['end']); ?>"<?php echo $hidden ? ' hidden' : ''; ?>>
+                    <td class="ohhol-holiday-date"><?php echo esc_html($label); ?></td>
                     <td class="ohhol-holiday-info">
                         <?php if ($formatted !== ''): ?>
                             <?php echo esc_html($formatted); ?>
@@ -468,7 +502,7 @@ function ohhol_group_days_by_hours(array $hours, array $weekdays): array {
  */
 function ohhol_shortcode_compact($atts): string {
     $atts = shortcode_atts([
-        'status'    => 0,
+        'status'    => null,
         'title'     => '',
         'title_tag' => 'h3',
     ], $atts, 'opening_hours_compact');
@@ -478,14 +512,17 @@ function ohhol_shortcode_compact($atts): string {
     $hours       = ohhol_get_hours();
     $options     = ohhol_get_options();
     $groups      = ohhol_group_days_by_hours($hours, ohhol_get_weekdays_ordered());
-    $show_status = (int) $atts['status'] || $options['show_status'];
+    // An explicit status attribute wins over the global "Show open now status" option.
+    $show_status = $atts['status'] === null ? (bool) $options['show_status'] : (bool) (int) $atts['status'];
 
     ob_start();
     ?>
     <div class="ohhol-compact">
         <?php echo ohhol_render_title((string) $atts['title'], ohhol_sanitize_title_tag($atts['title_tag'], 'h3')); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in ohhol_render_title() ?>
 
-        <?php if ($show_status): ?>
+        <?php if ($show_status && ohhol_is_editor_preview()): ?>
+            <div class="ohhol-compact-status"><?php echo ohhol_render_status_preview(); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in ohhol_render_status_preview() ?></div>
+        <?php elseif ($show_status): ?>
             <div class="ohhol-compact-status">
                 <span class="ohhol-status" data-ohhol-status role="status"></span>
                 <span class="ohhol-today-note" data-ohhol-today-note hidden></span>
@@ -512,4 +549,74 @@ function ohhol_shortcode_compact($atts): string {
     </div>
     <?php
     return (string) ob_get_clean();
+}
+
+/**
+ * Whether we are rendering a preview for the block editor (REST request).
+ */
+function ohhol_is_editor_preview(): bool {
+    return wp_is_serving_rest_request();
+}
+
+/**
+ * Server-side status badge for editor previews.
+ */
+function ohhol_render_status_preview(): string {
+    $status = ohhol_get_current_status();
+    $soon   = (int) ohhol_get_options()['soon_minutes'];
+
+    if ($status['open']) {
+        $class = 'ohhol-open';
+        $text  = ($soon > 0 && $status['closes_in'] !== null && $status['closes_in'] <= $soon)
+            ? __('Closes soon', 'opening-hours-holidays')
+            : __('Open now', 'opening-hours-holidays');
+    } else {
+        $class = 'ohhol-shut';
+        $text  = ($soon > 0 && $status['opens_in'] !== null && $status['opens_in'] <= $soon)
+            ? __('Opens soon', 'opening-hours-holidays')
+            : __('Currently closed', 'opening-hours-holidays');
+    }
+    return sprintf('<span class="ohhol-status %s">%s</span>', esc_attr($class), esc_html($text));
+}
+
+/**
+ * Wrap conditional content (shown/hidden client-side, so it works with page caching).
+ */
+function ohhol_render_conditional($atts, $content, string $state, string $tag): string {
+    $atts = shortcode_atts(['inline' => 0], $atts, $tag);
+    if ($content === null || $content === '') {
+        return '';
+    }
+
+    $content = do_shortcode(shortcode_unautop((string) $content));
+
+    // Editor preview: decide server-side.
+    if (ohhol_is_editor_preview()) {
+        $open = ohhol_get_current_status()['open'];
+        return ($state === 'open') === $open ? $content : '';
+    }
+
+    ohhol_enqueue_assets();
+    $element = (int) $atts['inline'] ? 'span' : 'div';
+
+    return sprintf(
+        '<%1$s class="ohhol-if ohhol-if-%2$s" data-ohhol-if="%2$s" hidden>%3$s</%1$s>',
+        $element,
+        esc_attr($state),
+        $content
+    );
+}
+
+/**
+ * Shortcode: [opening_hours_if_open]…[/opening_hours_if_open]
+ */
+function ohhol_shortcode_if_open($atts, $content = null): string {
+    return ohhol_render_conditional($atts, $content, 'open', 'opening_hours_if_open');
+}
+
+/**
+ * Shortcode: [opening_hours_if_closed]…[/opening_hours_if_closed]
+ */
+function ohhol_shortcode_if_closed($atts, $content = null): string {
+    return ohhol_render_conditional($atts, $content, 'closed', 'opening_hours_if_closed');
 }

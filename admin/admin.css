@@ -26,6 +26,15 @@
     width: 130px;
 }
 
+.ohhol-holidays-table .ohhol-holiday-dates {
+    white-space: nowrap;
+}
+
+.ohhol-holidays-table .ohhol-col-recurring {
+    width: 70px;
+    text-align: center;
+}
+
 .ohhol-holidays-table .ohhol-time-input {
     width: 85px;
 }
@@ -39,7 +48,7 @@
 }
 
 .ohhol-holidays-table .ohhol-col-date {
-    width: 140px;
+    width: 300px;
 }
 
 .ohhol-holidays-table .ohhol-col-status {
@@ -121,4 +130,29 @@
     font-weight: 600;
     color: #2271b1;
     cursor: help;
+}
+
+.ohhol-schema-conflict {
+    margin: 10px 0 0;
+}
+
+.ohhol-csv-box {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    padding: 12px 20px 16px;
+    margin: 16px 0;
+    max-width: 960px;
+}
+
+.ohhol-csv-box h3 {
+    margin-top: 8px;
+}
+
+.ohhol-csv-preview {
+    max-width: 960px;
+    margin: 10px 0 14px;
+}
+
+.ohhol-csv-preview .ohhol-csv-skipped td {
+    color: #b32d2e;
 }

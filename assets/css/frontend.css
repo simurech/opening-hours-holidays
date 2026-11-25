@@ -202,6 +202,22 @@ p:empty:has(+ .ohhol-compact) {
     background: var(--ohhol-shut-dot);
 }
 
+/* "Opens soon / Closes soon": pulsing dot */
+.ohhol-status.ohhol-soon::before {
+    animation: ohhol-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ohhol-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.25; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ohhol-status.ohhol-soon::before {
+        animation: none;
+    }
+}
+
 /* Holidays list */
 .ohhol-holidays {
     margin: 0 0 20px 0;

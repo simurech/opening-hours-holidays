@@ -1,0 +1,58 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "ohhol/opening-hours",
+    "version": "2.1.0",
+    "title": "Opening Hours",
+    "category": "widgets",
+    "icon": "clock",
+    "description": "Show your opening hours, today's hours, upcoming holidays or a compact list with live status.",
+    "keywords": ["hours", "business hours", "holidays", "open", "schedule"],
+    "textdomain": "opening-hours-holidays",
+    "attributes": {
+        "view": {
+            "type": "string",
+            "enum": ["week", "today", "holidays", "compact"],
+            "default": "week"
+        },
+        "title": {
+            "type": "string",
+            "default": ""
+        },
+        "titleTag": {
+            "type": "string",
+            "enum": ["h2", "h3", "h4", "h5", "h6"],
+            "default": "h2"
+        },
+        "showStatus": {
+            "type": "boolean",
+            "default": true
+        },
+        "days": {
+            "type": "number",
+            "default": 30
+        },
+        "limit": {
+            "type": "number",
+            "default": 0
+        }
+    },
+    "supports": {
+        "html": false,
+        "align": ["wide", "full"],
+        "spacing": {
+            "margin": true,
+            "padding": true
+        },
+        "typography": {
+            "fontSize": true
+        },
+        "color": {
+            "text": true,
+            "background": true
+        }
+    },
+    "editorScript": "file:./index.js",
+    "style": "ohhol-frontend",
+    "render": "file:./render.php"
+}

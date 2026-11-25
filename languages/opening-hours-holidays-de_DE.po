@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Opening Hours & Holidays 2.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/opening-hours-holidays\n"
-"POT-Creation-Date: 2026-11-25T11:04:44+00:00\n"
+"POT-Creation-Date: 2026-11-25T11:19:38+00:00\n"
 "PO-Revision-Date: 2026-07-08T12:00:00+00:00\n"
 "Last-Translator: Pulacha Labs\n"
 "Language-Team: German\n"
@@ -42,7 +42,289 @@ msgstr "Pulacha Labs"
 msgid "https://pulacha-labs.ch/"
 msgstr "https://pulacha-labs.ch/"
 
-#: includes/settings.php:15 includes/settings.php:16 includes/settings.php:403
+#: includes/csv.php:39
+msgid "Sorry, you are not allowed to do that."
+msgstr "Dafür fehlt die Berechtigung."
+
+#: includes/csv.php:92 includes/csv.php:309
+msgctxt "CSV status value"
+msgid "closed"
+msgstr "geschlossen"
+
+#: includes/csv.php:93 includes/csv.php:308
+msgctxt "CSV status value"
+msgid "modified"
+msgstr "geändert"
+
+#: includes/csv.php:94 includes/csv.php:314
+msgctxt "CSV yes value"
+msgid "yes"
+msgstr "ja"
+
+#: includes/csv.php:169
+msgid "Too many rows (maximum 1000)"
+msgstr "Zu viele Zeilen (maximal 1000)"
+
+#: includes/csv.php:179
+msgid "Invalid or missing date in column A"
+msgstr "Ungültiges oder fehlendes Datum in Spalte A"
+
+#: includes/csv.php:187
+msgid "Invalid \"to\" date in column C"
+msgstr "Ungültiges „Bis“-Datum in Spalte C"
+
+#: includes/csv.php:191
+msgid "The \"to\" date is before the start date"
+msgstr "Das „Bis“-Datum liegt vor dem Startdatum"
+
+#: includes/csv.php:201
+msgid "More than 90 days in the past"
+msgstr "Mehr als 90 Tage in der Vergangenheit"
+
+#: includes/csv.php:208
+msgid "Unknown status in column D (use \"closed\" or \"modified\")"
+msgstr "Unbekannter Status in Spalte D („geschlossen“ oder „geändert“ verwenden)"
+
+#: includes/csv.php:220
+msgid "Status \"modified\" needs opening hours in columns E and F"
+msgstr "Status „geändert“ benötigt Öffnungszeiten in den Spalten E und F"
+
+#: includes/csv.php:277 includes/csv.php:292 includes/csv.php:430
+msgid "Date"
+msgstr "Datum"
+
+#: includes/csv.php:277 includes/csv.php:293 includes/csv.php:431
+#: blocks/opening-hours/index.js:39
+msgid "Title"
+msgstr "Bezeichnung"
+
+#: includes/csv.php:278
+msgid "New Year's Day"
+msgstr "Neujahr"
+
+#: includes/csv.php:279
+msgid "Christmas Day"
+msgstr "Weihnachten"
+
+#: includes/csv.php:280
+msgid "Boxing Day"
+msgstr "Stephanstag"
+
+#: includes/csv.php:294
+msgid "To"
+msgstr "Bis"
+
+#: includes/csv.php:295 includes/csv.php:432 includes/settings.php:517
+msgid "Status"
+msgstr "Status"
+
+#: includes/csv.php:296
+msgid "From 1"
+msgstr "Von 1"
+
+#: includes/csv.php:297
+msgid "To 1"
+msgstr "Bis 1"
+
+#: includes/csv.php:298
+msgid "From 2"
+msgstr "Von 2"
+
+#: includes/csv.php:299
+msgid "To 2"
+msgstr "Bis 2"
+
+#: includes/csv.php:300 includes/csv.php:433 includes/settings.php:407
+#: includes/settings.php:516 opening-hours-holidays.php:50
+msgid "Every year"
+msgstr "Jährlich"
+
+#: includes/csv.php:333
+msgid "Please choose a CSV file to upload."
+msgstr "Bitte eine CSV-Datei zum Hochladen auswählen."
+
+#: includes/csv.php:335
+msgid "The file is too large (maximum 1 MB)."
+msgstr "Die Datei ist zu gross (maximal 1 MB)."
+
+#: includes/csv.php:337
+msgid "Please upload a .csv file."
+msgstr "Bitte eine .csv-Datei hochladen."
+
+#: includes/csv.php:344
+msgid "The file does not contain any entries."
+msgstr "Die Datei enthält keine Einträge."
+
+#. translators: %d: number of imported entries
+#: includes/csv.php:388
+#, php-format
+msgid "%d entry imported."
+msgid_plural "%d entries imported."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/csv.php:409
+msgid "Import & export holidays (CSV)"
+msgstr "Feiertage importieren & exportieren (CSV)"
+
+#: includes/csv.php:416
+msgid "Preview"
+msgstr "Vorschau"
+
+#. translators: 1: number of valid rows, 2: number of skipped rows
+#: includes/csv.php:421
+#, php-format
+msgid "%1$d valid entries, %2$d skipped rows. Nothing has been saved yet."
+msgstr "%1$d gültige Einträge, %2$d übersprungene Zeilen. Es wurde noch nichts gespeichert."
+
+#: includes/csv.php:452 includes/settings.php:411 includes/shortcodes.php:173
+#: includes/shortcodes.php:290 includes/shortcodes.php:342
+#: includes/shortcodes.php:363 includes/shortcodes.php:453
+#: includes/shortcodes.php:543 opening-hours-holidays.php:43
+msgid "Closed"
+msgstr "Geschlossen"
+
+#: includes/csv.php:455
+msgid "Yes"
+msgstr "Ja"
+
+#. translators: 1: line number, 2: reason, 3: line content
+#: includes/csv.php:464
+#, php-format
+msgid "Line %1$d skipped: %2$s – \"%3$s\""
+msgstr "Zeile %1$d übersprungen: %2$s – „%3$s“"
+
+#: includes/csv.php:481
+msgid "Replace all existing entries (otherwise entries are added and entries with the same date are overwritten)"
+msgstr "Alle bestehenden Einträge ersetzen (sonst werden Einträge ergänzt und solche mit gleichem Datum überschrieben)"
+
+#: includes/csv.php:486
+msgid "Import entries"
+msgstr "Einträge importieren"
+
+#: includes/csv.php:488
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: includes/csv.php:493
+msgid "Import many dates at once, e.g. public holidays from a spreadsheet. Column A: date (25.12.2026 or 2026-12-25), column B: title. Every row is imported as \"Closed\". The export contains all fields and can be imported again."
+msgstr "Viele Daten auf einmal importieren, z. B. Feiertage aus einer Tabelle. Spalte A: Datum (25.12.2026 oder 2026-12-25), Spalte B: Bezeichnung. Jede Zeile wird als „Geschlossen“ importiert. Der Export enthält alle Felder und kann wieder importiert werden."
+
+#: includes/csv.php:496
+msgid "Download template"
+msgstr "Vorlage herunterladen"
+
+#: includes/csv.php:497
+msgid "Export entries"
+msgstr "Einträge exportieren"
+
+#: includes/csv.php:503
+msgid "CSV file"
+msgstr "CSV-Datei"
+
+#: includes/csv.php:505
+msgid "Upload and preview"
+msgstr "Hochladen und Vorschau anzeigen"
+
+#: includes/schema.php:15
+msgid "Local business (generic)"
+msgstr "Lokales Geschäft (allgemein)"
+
+#: includes/schema.php:16
+msgid "Store / shop"
+msgstr "Laden / Geschäft"
+
+#: includes/schema.php:17
+msgid "Restaurant"
+msgstr "Restaurant"
+
+#: includes/schema.php:18
+msgid "Café"
+msgstr "Café"
+
+#: includes/schema.php:19
+msgid "Bakery"
+msgstr "Bäckerei"
+
+#: includes/schema.php:20
+msgid "Bar / pub"
+msgstr "Bar / Pub"
+
+#: includes/schema.php:21
+msgid "Food establishment (other)"
+msgstr "Gastronomie (andere)"
+
+#: includes/schema.php:22
+msgid "Hair salon"
+msgstr "Coiffeur / Friseur"
+
+#: includes/schema.php:23
+msgid "Beauty salon"
+msgstr "Kosmetikstudio"
+
+#: includes/schema.php:24
+msgid "Health & beauty business"
+msgstr "Gesundheit & Schönheit"
+
+#: includes/schema.php:25
+msgid "Medical practice"
+msgstr "Arztpraxis"
+
+#: includes/schema.php:26
+msgid "Dentist"
+msgstr "Zahnarzt"
+
+#: includes/schema.php:27
+msgid "Pharmacy"
+msgstr "Apotheke"
+
+#: includes/schema.php:28
+msgid "Car repair / garage"
+msgstr "Autowerkstatt / Garage"
+
+#: includes/schema.php:29
+msgid "Trades & construction"
+msgstr "Handwerk & Bau"
+
+#: includes/schema.php:30
+msgid "Professional service"
+msgstr "Dienstleistung"
+
+#: includes/schema.php:31
+msgid "Legal service"
+msgstr "Rechtsberatung"
+
+#: includes/schema.php:32
+msgid "Financial service"
+msgstr "Finanzdienstleistung"
+
+#: includes/schema.php:33
+msgid "Real estate agent"
+msgstr "Immobilien"
+
+#: includes/schema.php:34
+msgid "Sports / fitness"
+msgstr "Sport / Fitness"
+
+#: includes/schema.php:35
+msgid "Hotel / lodging"
+msgstr "Hotel / Unterkunft"
+
+#: includes/schema.php:36
+msgid "Library"
+msgstr "Bibliothek"
+
+#: includes/schema.php:37
+msgid "Government office"
+msgstr "Behörde / Amt"
+
+#. translators: %s: plugin name(s), e.g. "Yoast Local SEO"
+#: includes/schema.php:74
+#, php-format
+msgid "%s is active and may already output LocalBusiness structured data. To avoid duplicate data for search engines, enable only one of them – or keep ours disabled and add your opening hours there."
+msgstr "%s ist aktiv und gibt möglicherweise bereits LocalBusiness-Strukturdaten aus. Um doppelte Daten für Suchmaschinen zu vermeiden, nur eine Ausgabe aktivieren – oder unsere deaktiviert lassen und die Öffnungszeiten dort pflegen."
+
+#: includes/settings.php:15 includes/settings.php:16 includes/settings.php:450
 msgid "Opening Hours"
 msgstr "Öffnungszeiten"
 
@@ -74,298 +356,444 @@ msgstr "Samstag"
 msgid "Sunday"
 msgstr "Sonntag"
 
-#: includes/settings.php:229
+#: includes/settings.php:249
 msgid "Some opening hours were incomplete or started and ended at the same time and have been removed. Please check your weekly hours."
 msgstr "Einige Öffnungszeiten waren unvollständig oder begannen und endeten zur selben Zeit und wurden entfernt. Bitte die Wochenzeiten prüfen."
 
-#: includes/settings.php:278
-msgid "Some holiday hours were incomplete and have been removed. Please check your exceptions."
-msgstr "Einige Zeiten bei Feiertagen/Ausnahmen waren unvollständig und wurden entfernt. Bitte die Ausnahmen prüfen."
+#: includes/settings.php:314
+msgid "Some holiday entries were incomplete or too long (maximum one year) and have been adjusted. Please check your exceptions."
+msgstr "Einige Feiertags-/Ausnahme-Einträge waren unvollständig oder zu lang (maximal ein Jahr) und wurden angepasst. Bitte die Ausnahmen prüfen."
 
-#: includes/settings.php:360 includes/shortcodes.php:169
-#: includes/shortcodes.php:286 includes/shortcodes.php:341
-#: includes/shortcodes.php:419 includes/shortcodes.php:506
-#: opening-hours-holidays.php:40
-msgid "Closed"
-msgstr "Geschlossen"
+#: includes/settings.php:402 opening-hours-holidays.php:48
+msgid "From"
+msgstr "Von"
 
-#: includes/settings.php:361 opening-hours-holidays.php:41
+#: includes/settings.php:404 opening-hours-holidays.php:49
+msgid "To (optional)"
+msgstr "Bis (optional)"
+
+#: includes/settings.php:412 opening-hours-holidays.php:44
 msgid "Modified hours"
 msgstr "Geänderte Zeiten"
 
-#: includes/settings.php:377 opening-hours-holidays.php:42
+#: includes/settings.php:425 opening-hours-holidays.php:45
 msgid "e.g. Public holiday"
 msgstr "z. B. Feiertag"
 
-#: includes/settings.php:381 opening-hours-holidays.php:43
+#: includes/settings.php:428 opening-hours-holidays.php:46
 msgid "Remove entry"
 msgstr "Eintrag entfernen"
 
-#: includes/settings.php:409
+#: includes/settings.php:456
 msgid "Regular opening hours"
 msgstr "Reguläre Öffnungszeiten"
 
-#: includes/settings.php:410
+#: includes/settings.php:457
 msgid "Times are shown in the time format and week order configured under Settings → General. A closing time earlier than the opening time ends on the following day (e.g. 22:00 – 02:00)."
 msgstr "Zeiten werden im Zeitformat und mit dem Wochenbeginn aus Einstellungen → Allgemein angezeigt. Liegt die Schliesszeit vor der Öffnungszeit, endet das Zeitfenster am Folgetag (z. B. 22:00 – 02:00)."
 
-#: includes/settings.php:414
+#: includes/settings.php:461
 msgid "Day"
 msgstr "Tag"
 
-#: includes/settings.php:415
+#: includes/settings.php:462
 msgid "Open"
 msgstr "Offen"
 
-#: includes/settings.php:416
+#: includes/settings.php:463
 msgid "Time window 1 (e.g. morning)"
 msgstr "Zeitfenster 1 (z. B. Vormittag)"
 
-#: includes/settings.php:417
+#: includes/settings.php:464
 msgid "Time window 2 (e.g. afternoon)"
 msgstr "Zeitfenster 2 (z. B. Nachmittag)"
 
-#: includes/settings.php:455
+#: includes/settings.php:502
 msgid "Leave empty if there is no break"
 msgstr "Leer lassen, falls keine Pause"
 
-#: includes/settings.php:462 includes/settings.php:651
+#: includes/settings.php:509 includes/settings.php:745
+#: blocks/opening-hours/index.js:27
 msgid "Holidays & exceptions"
 msgstr "Feiertage & Ausnahmen"
 
-#: includes/settings.php:463
-msgid "Public holidays, company holidays or deviating hours on specific dates. Entries more than 90 days in the past are removed automatically when saving."
-msgstr "Feiertage, Betriebsferien oder abweichende Zeiten für bestimmte Daten. Einträge, die mehr als 90 Tage zurückliegen, werden beim Speichern automatisch entfernt."
+#: includes/settings.php:510
+msgid "Public holidays, company holidays or deviating hours on specific dates. Fill in \"to\" for a date range (e.g. company holidays) and tick \"Every year\" for dates that repeat annually. One-off entries more than 90 days in the past are removed automatically when saving."
+msgstr "Feiertage, Betriebsferien oder abweichende Zeiten an bestimmten Daten. Für einen Zeitraum (z. B. Betriebsferien) „Bis“ ausfüllen, für jährlich wiederkehrende Daten „Jährlich“ anhaken. Einmalige Einträge, die mehr als 90 Tage zurückliegen, werden beim Speichern automatisch entfernt."
 
-#: includes/settings.php:468
-msgid "Date"
-msgstr "Datum"
+#: includes/settings.php:515
+msgid "Date (from – to)"
+msgstr "Datum (von – bis)"
 
-#: includes/settings.php:469
-msgid "Status"
-msgstr "Status"
-
-#: includes/settings.php:470
+#: includes/settings.php:518
 msgid "Hours (if modified)"
 msgstr "Zeiten (falls geändert)"
 
-#: includes/settings.php:471
+#: includes/settings.php:519
 msgid "Note"
 msgstr "Bemerkung"
 
-#: includes/settings.php:483
+#: includes/settings.php:531
 msgid "Add entry"
 msgstr "Eintrag hinzufügen"
 
-#: includes/settings.php:486
+#: includes/settings.php:534
 msgid "Options"
 msgstr "Optionen"
 
-#: includes/settings.php:489
+#: includes/settings.php:537 blocks/opening-hours/index.js:58
 msgid "Show \"Open now\" status"
 msgstr "\"Jetzt geöffnet\"-Status anzeigen"
 
 #. translators: %s: shortcode name
-#: includes/settings.php:499
+#: includes/settings.php:547
 #, php-format
 msgid "Show whether the business is currently open in the %s shortcode"
 msgstr "Im Shortcode %s anzeigen, ob gerade geöffnet ist"
 
-#: includes/settings.php:507
+#: includes/settings.php:555
+msgid "\"Opens soon / Closes soon\""
+msgstr "„Öffnet bald / Schliesst bald“"
+
+#: includes/settings.php:558
+msgid "minutes"
+msgstr "Minuten"
+
+#: includes/settings.php:559
+msgid "The status badge shows \"Opens soon\" or \"Closes soon\" within this many minutes before a change. 0 disables the hint."
+msgstr "Das Status-Badge zeigt so viele Minuten vor einem Wechsel „Öffnet bald“ bzw. „Schliesst bald“. 0 deaktiviert den Hinweis."
+
+#: includes/settings.php:563
 msgid "Schema.org structured data"
 msgstr "Strukturierte Daten (schema.org)"
 
-#: includes/settings.php:514
+#: includes/settings.php:570
 msgid "Add LocalBusiness structured data (JSON-LD) with your opening hours to every page — helps search engines display your hours"
 msgstr "LocalBusiness-Daten (JSON-LD) mit deinen Öffnungszeiten auf jeder Seite ausgeben – hilft Suchmaschinen, deine Öffnungszeiten anzuzeigen"
 
-#: includes/settings.php:517
+#: includes/settings.php:576
 msgid "Business name"
 msgstr "Name des Geschäfts"
 
-#: includes/settings.php:525
+#: includes/settings.php:579
 msgid "Leave empty to use the site title."
 msgstr "Leer lassen, um den Titel der Website zu verwenden."
 
-#: includes/settings.php:530
+#: includes/settings.php:583
+msgid "Business type"
+msgstr "Art des Geschäfts"
+
+#: includes/settings.php:593
+msgid "Address"
+msgstr "Adresse"
+
+#: includes/settings.php:595
+msgid "Street and number"
+msgstr "Strasse und Nummer"
+
+#: includes/settings.php:597
+msgid "Postal code"
+msgstr "PLZ"
+
+#: includes/settings.php:598
+msgid "City"
+msgstr "Ort"
+
+#: includes/settings.php:601
+msgid "Region / canton / state"
+msgstr "Region / Kanton / Bundesland"
+
+#: includes/settings.php:602
+msgid "Country code (2 letters)"
+msgstr "Ländercode (2 Buchstaben)"
+
+#: includes/settings.php:604
+msgid "Search engines need an address to show your business with its hours. Country as a two-letter code, e.g. CH, DE, AT."
+msgstr "Suchmaschinen benötigen eine Adresse, um das Geschäft mit seinen Öffnungszeiten anzuzeigen. Land als zweistelliger Code, z. B. CH, DE, AT."
+
+#: includes/settings.php:608
+msgid "Telephone"
+msgstr "Telefon"
+
+#: includes/settings.php:614
+msgid "Output on"
+msgstr "Ausgabe auf"
+
+#: includes/settings.php:616
+msgid "All pages"
+msgstr "Allen Seiten"
+
+#: includes/settings.php:617
+msgid "Front page only"
+msgstr "Nur der Startseite"
+
+#: includes/settings.php:622
 msgid "Design"
 msgstr "Design"
 
-#: includes/settings.php:532
+#: includes/settings.php:624
 msgid "Font and primary text color are inherited from your theme. The colors below can be customized."
 msgstr "Schriftart und primäre Textfarbe werden vom Theme übernommen. Die folgenden Farben können angepasst werden."
 
-#: includes/settings.php:535
+#: includes/settings.php:627
 msgid "Text & table"
 msgstr "Text & Tabelle"
 
-#: includes/settings.php:538
+#: includes/settings.php:630
 msgid "Muted text color"
 msgstr "Gedämpfte Textfarbe"
 
-#: includes/settings.php:542
+#: includes/settings.php:634
 msgid "Used for times and secondary information (default: #666666)"
 msgstr "Für Uhrzeiten und Nebeninformationen (Standard: #666666)"
 
-#: includes/settings.php:546
+#: includes/settings.php:638
 msgid "Faint text color"
 msgstr "Sehr gedämpfte Textfarbe"
 
-#: includes/settings.php:550
+#: includes/settings.php:642
 msgid "Used for notes and additions in brackets (default: #999999)"
 msgstr "Für Bemerkungen und Klammerzusätze (Standard: #999999)"
 
-#: includes/settings.php:554
+#: includes/settings.php:646
 msgid "Zebra stripes"
 msgstr "Zebra-Streifen"
 
-#: includes/settings.php:558
+#: includes/settings.php:650
 msgid "Add a background color to odd rows"
 msgstr "Ungerade Zeilen farblich hinterlegen"
 
-#: includes/settings.php:563
+#: includes/settings.php:655
 msgid "Zebra stripe color"
 msgstr "Zebra-Streifen-Farbe"
 
-#: includes/settings.php:571
+#: includes/settings.php:663
 msgid "\"Today\" marker"
 msgstr "\"Heute\"-Marker"
 
-#: includes/settings.php:574
+#: includes/settings.php:666
 msgid "Background color"
 msgstr "Hintergrundfarbe"
 
-#: includes/settings.php:581
+#: includes/settings.php:673
 msgid "Text color"
 msgstr "Textfarbe"
 
-#: includes/settings.php:589
+#: includes/settings.php:681
 msgid "Status colors"
 msgstr "Status-Farben"
 
-#: includes/settings.php:592
+#: includes/settings.php:684
 msgid "\"Closed\" text color"
 msgstr "Textfarbe für \"Geschlossen\""
 
-#: includes/settings.php:599
+#: includes/settings.php:691
 msgid "\"Open now\" badge"
 msgstr "Badge \"Jetzt geöffnet\""
 
-#: includes/settings.php:601 includes/settings.php:617
+#: includes/settings.php:693 includes/settings.php:709
 msgid "Background"
 msgstr "Hintergrund"
 
-#: includes/settings.php:605 includes/settings.php:621
+#: includes/settings.php:697 includes/settings.php:713
 msgid "Text"
 msgstr "Text"
 
-#: includes/settings.php:609 includes/settings.php:625
+#: includes/settings.php:701 includes/settings.php:717
 msgid "Dot"
 msgstr "Punkt"
 
-#: includes/settings.php:615
+#: includes/settings.php:707
 msgid "\"Currently closed\" badge"
 msgstr "Badge \"Aktuell geschlossen\""
 
-#: includes/settings.php:632
+#: includes/settings.php:724
 msgid "Save settings"
 msgstr "Einstellungen speichern"
 
-#: includes/settings.php:637
+#: includes/settings.php:731
 msgid "Shortcode reference"
 msgstr "Shortcode-Anleitung"
 
-#: includes/settings.php:639
+#: includes/settings.php:733 blocks/opening-hours/index.js:25
 msgid "Weekly overview"
 msgstr "Wochenübersicht"
 
-#: includes/settings.php:641
+#: includes/settings.php:735
 msgid "Shows a table with all weekdays and the regular opening hours. The current day is highlighted."
 msgstr "Zeigt eine Tabelle mit allen Wochentagen und den regulären Öffnungszeiten. Der heutige Tag wird hervorgehoben."
 
-#: includes/settings.php:643
+#: includes/settings.php:737
 msgid "Optional title above the table"
 msgstr "Optionaler Titel über der Tabelle"
 
-#: includes/settings.php:644 includes/settings.php:658
+#: includes/settings.php:738 includes/settings.php:752
 msgid "HTML tag for the title (default: h2)"
 msgstr "HTML-Tag für den Titel (Standard: h2)"
 
-#: includes/settings.php:647 includes/shortcodes.php:172
+#: includes/settings.php:741 includes/shortcodes.php:176
+#: blocks/opening-hours/index.js:26
 msgid "Today"
 msgstr "Heute"
 
-#: includes/settings.php:649
+#: includes/settings.php:743
 msgid "Shows only the current day. Holiday exceptions are applied automatically."
 msgstr "Zeigt nur den heutigen Tag. Feiertags-Ausnahmen werden automatisch berücksichtigt."
 
-#: includes/settings.php:653
+#: includes/settings.php:747
 msgid "Shows upcoming holidays and exceptions."
 msgstr "Zeigt kommende Feiertage und Ausnahmen."
 
-#: includes/settings.php:655
+#: includes/settings.php:749
 msgid "Only entries up to X days in the future (default: 30)"
 msgstr "Nur Einträge bis X Tage in der Zukunft (Standard: 30)"
 
-#: includes/settings.php:656
+#: includes/settings.php:750
 msgid "Maximum number of entries (optional)"
 msgstr "Maximale Anzahl Einträge (optional)"
 
-#: includes/settings.php:657
+#: includes/settings.php:751
 msgid "Optional title (only shown if there are entries)"
 msgstr "Optionaler Titel (nur sichtbar, wenn Einträge vorhanden sind)"
 
-#: includes/settings.php:661
+#: includes/settings.php:755 blocks/opening-hours/index.js:28
 msgid "Compact overview (footer/sidebar)"
 msgstr "Kompakte Übersicht (Footer/Sidebar)"
 
-#: includes/settings.php:663
+#: includes/settings.php:757
 msgid "Space-saving list. Consecutive days with identical hours are grouped automatically (e.g. \"Monday – Friday\")."
 msgstr "Platzsparende Liste. Aufeinanderfolgende Tage mit gleichen Zeiten werden automatisch zusammengefasst (z. B. \"Montag – Freitag\")."
 
-#: includes/settings.php:665
+#: includes/settings.php:759
 msgid "Show the \"Open now / Currently closed\" badge"
 msgstr "Badge \"Jetzt geöffnet / Aktuell geschlossen\" anzeigen"
 
-#: includes/settings.php:666
+#: includes/settings.php:760
 msgid "Optional title"
 msgstr "Optionaler Titel"
 
-#: includes/settings.php:667
+#: includes/settings.php:761
 msgid "HTML tag for the title (default: h3)"
 msgstr "HTML-Tag für den Titel (Standard: h3)"
 
-#: includes/settings.php:671
+#: includes/settings.php:764
+msgid "Conditional content"
+msgstr "Bedingte Inhalte"
+
+#: includes/settings.php:767
+msgid "Shows the enclosed content only while the business is open or closed, e.g. a \"Call us now\" button. Works with page caching."
+msgstr "Zeigt den eingeschlossenen Inhalt nur, solange geöffnet bzw. geschlossen ist, z. B. einen „Jetzt anrufen“-Button. Funktioniert mit Seiten-Caching."
+
+#: includes/settings.php:769
+msgid "Render inline (span) instead of as a block (div)"
+msgstr "Inline (span) statt als Block (div) ausgeben"
+
+#: includes/settings.php:772
+msgid "Block editor"
+msgstr "Block-Editor"
+
+#: includes/settings.php:773
+msgid "All views are also available as the \"Opening Hours\" block, including a live preview in the editor."
+msgstr "Alle Ansichten gibt es auch als Block „Opening Hours“, inklusive Live-Vorschau im Editor."
+
+#: includes/settings.php:776
 msgid "The legacy shortcodes [oeffnungszeiten], [oeffnungszeiten_heute], [oeffnungszeiten_spezial] and [oeffnungszeiten_kompakt] keep working as aliases."
 msgstr "Die bisherigen Shortcodes [oeffnungszeiten], [oeffnungszeiten_heute], [oeffnungszeiten_spezial] und [oeffnungszeiten_kompakt] funktionieren weiterhin als Aliase."
 
-#: includes/shortcodes.php:170
+#: includes/shortcodes.php:171 includes/shortcodes.php:571
+msgid "Closes soon"
+msgstr "Schliesst bald"
+
+#: includes/shortcodes.php:172 includes/shortcodes.php:576
+msgid "Opens soon"
+msgstr "Öffnet bald"
+
+#: includes/shortcodes.php:174 includes/shortcodes.php:572
 msgid "Open now"
 msgstr "Jetzt geöffnet"
 
-#: includes/shortcodes.php:171
+#: includes/shortcodes.php:175 includes/shortcodes.php:577
 msgid "Currently closed"
 msgstr "Aktuell geschlossen"
 
 #. translators: prefix shown before the regular hours when a holiday exception applies
-#: includes/shortcodes.php:174
+#: includes/shortcodes.php:178
 msgid "Regular:"
 msgstr "Regulär:"
 
-#: includes/shortcodes.php:274
+#: includes/shortcodes.php:278
 msgid "Weekly opening hours"
 msgstr "Wöchentliche Öffnungszeiten"
 
 #. translators: date format for holiday entries, see https://www.php.net/manual/datetime.format.php
-#: includes/shortcodes.php:396
+#: includes/shortcodes.php:417
 msgctxt "holiday date format"
 msgid "l, F j, Y"
 msgstr "l, j. F Y"
 
-#: includes/shortcodes.php:406
+#: includes/shortcodes.php:430
 msgid "Upcoming holidays and exceptions"
 msgstr "Kommende Feiertage und Ausnahmen"
 
-#: opening-hours-holidays.php:44
+#: opening-hours-holidays.php:47
 msgid "Ends on the following day"
 msgstr "Endet am Folgetag"
+
+#: blocks/opening-hours/index.js:22
+msgid "View"
+msgstr "Ansicht"
+
+#: blocks/opening-hours/index.js:46
+msgid "Title level"
+msgstr "Titel-Ebene"
+
+#: blocks/opening-hours/index.js:69
+msgid "Days ahead"
+msgstr "Tage im Voraus"
+
+#: blocks/opening-hours/index.js:78
+msgid "Maximum number of entries (0 = all)"
+msgstr "Maximale Anzahl Einträge (0 = alle)"
+
+#: blocks/opening-hours/index.js:90
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: blocks/opening-hours/index.js:99
+msgid "No upcoming holidays or exceptions."
+msgstr "Keine anstehenden Feiertage oder Ausnahmen."
+
+#: blocks/opening-hours/block.json
+msgctxt "block title"
+msgid "Opening Hours"
+msgstr "Öffnungszeiten"
+
+#: blocks/opening-hours/block.json
+msgctxt "block description"
+msgid "Show your opening hours, today's hours, upcoming holidays or a compact list with live status."
+msgstr "Zeigt die Öffnungszeiten, die heutigen Zeiten, anstehende Feiertage oder eine kompakte Liste mit Live-Status."
+
+#: blocks/opening-hours/block.json
+msgctxt "block keyword"
+msgid "hours"
+msgstr "Öffnungszeiten"
+
+#: blocks/opening-hours/block.json
+msgctxt "block keyword"
+msgid "business hours"
+msgstr "Geschäftszeiten"
+
+#: blocks/opening-hours/block.json
+msgctxt "block keyword"
+msgid "holidays"
+msgstr "Feiertage"
+
+#: blocks/opening-hours/block.json
+msgctxt "block keyword"
+msgid "open"
+msgstr "geöffnet"
+
+#: blocks/opening-hours/block.json
+msgctxt "block keyword"
+msgid "schedule"
+msgstr "Zeitplan"

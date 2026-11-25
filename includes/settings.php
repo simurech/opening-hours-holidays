@@ -153,30 +153,50 @@ function ohhol_get_hours() {
 /**
  * Holiday entries (cached per request).
  */
-function ohhol_get_holidays() {
+function ohhol_get_holidays(): array {
     static $cached = null;
     if ($cached !== null) {
         return $cached;
     }
-    $cached = get_option('ohhol_holidays', []);
+    $cached = [];
+    foreach ((array) get_option('ohhol_holidays', []) as $entry) {
+        if (is_array($entry) && !empty($entry['date'])) {
+            $cached[] = wp_parse_args($entry, ohhol_get_holiday_defaults());
+        }
+    }
     return $cached;
 }
 
 /**
  * General options (cached per request).
  */
-function ohhol_get_options() {
+function ohhol_get_options(): array {
     static $cached = null;
     if ($cached !== null) {
         return $cached;
     }
-    $defaults = [
-        'show_status'    => 0,
-        'schema_enabled' => 0,
-        'schema_name'    => '',
-    ];
-    $cached = wp_parse_args(get_option('ohhol_options', []), $defaults);
+    $cached = wp_parse_args(get_option('ohhol_options', []), ohhol_get_options_defaults());
     return $cached;
+}
+
+/**
+ * Default general options.
+ */
+function ohhol_get_options_defaults(): array {
+    return [
+        'show_status'        => 0,
+        'soon_minutes'       => 30,
+        'schema_enabled'     => 0,
+        'schema_name'        => '',
+        'schema_type'        => 'LocalBusiness',
+        'schema_scope'       => 'all',
+        'schema_street'      => '',
+        'schema_postal_code' => '',
+        'schema_city'        => '',
+        'schema_region'      => '',
+        'schema_country'     => '',
+        'schema_telephone'   => '',
+    ];
 }
 
 /**
@@ -252,30 +272,46 @@ function ohhol_sanitize_holidays($input) {
             continue;
         }
         $date = ohhol_sanitize_date($item['date'] ?? '');
-        if ($date === '' || $date < $cutoff) {
+        if ($date === '') {
             continue;
         }
         $status = (isset($item['status']) && in_array($item['status'], ['closed', 'modified'], true))
             ? $item['status']
             : 'closed';
 
+        $recurring = !empty($item['recurring']) ? 1 : 0;
+        $date_end  = ohhol_sanitize_date($item['date_end'] ?? '');
+        if ($date_end !== '' && $date_end <= $date) {
+            $date_end = '';
+        }
+        if ($date_end !== '' && ohhol_days_between($date, $date_end) > OHHOL_MAX_RANGE_DAYS) {
+            $date_end  = ohhol_add_days($date, OHHOL_MAX_RANGE_DAYS);
+            $had_issue = true;
+        }
+        // One-off entries are cleaned up 90 days after their last day.
+        if (!$recurring && ($date_end ?: $date) < $cutoff) {
+            continue;
+        }
+
         $windows = $status === 'modified'
             ? ohhol_normalize_windows($item, $had_issue)
             : ['open1' => '', 'close1' => '', 'open2' => '', 'close2' => ''];
 
-        // Last entry for a date wins.
-        $sanitized[$date] = [
-            'date'   => $date,
-            'status' => $status,
+        // Last entry for a start date wins.
+        $sanitized[$date . '|' . $recurring] = [
+            'date'      => $date,
+            'date_end'  => $date_end,
+            'recurring' => $recurring,
+            'status'    => $status,
         ] + $windows + [
-            'note'   => sanitize_text_field($item['note'] ?? ''),
+            'note'      => sanitize_text_field($item['note'] ?? ''),
         ];
     }
 
     if ($had_issue) {
         ohhol_add_settings_notice(
             'ohhol_holidays_incomplete',
-            __('Some holiday hours were incomplete and have been removed. Please check your exceptions.', 'opening-hours-holidays')
+            __('Some holiday entries were incomplete or too long (maximum one year) and have been adjusted. Please check your exceptions.', 'opening-hours-holidays')
         );
     }
 
@@ -286,12 +322,23 @@ function ohhol_sanitize_holidays($input) {
 /**
  * Sanitize: general options.
  */
-function ohhol_sanitize_options($input) {
+function ohhol_sanitize_options($input): array {
     $input = is_array($input) ? $input : [];
+    $type  = sanitize_text_field($input['schema_type'] ?? 'LocalBusiness');
+
     return [
-        'show_status'    => isset($input['show_status']) ? 1 : 0,
-        'schema_enabled' => isset($input['schema_enabled']) ? 1 : 0,
-        'schema_name'    => sanitize_text_field($input['schema_name'] ?? ''),
+        'show_status'        => isset($input['show_status']) ? 1 : 0,
+        'soon_minutes'       => min(240, max(0, absint($input['soon_minutes'] ?? 30))),
+        'schema_enabled'     => isset($input['schema_enabled']) ? 1 : 0,
+        'schema_name'        => sanitize_text_field($input['schema_name'] ?? ''),
+        'schema_type'        => array_key_exists($type, ohhol_get_schema_types()) ? $type : 'LocalBusiness',
+        'schema_scope'       => (($input['schema_scope'] ?? 'all') === 'front') ? 'front' : 'all',
+        'schema_street'      => sanitize_text_field($input['schema_street'] ?? ''),
+        'schema_postal_code' => sanitize_text_field($input['schema_postal_code'] ?? ''),
+        'schema_city'        => sanitize_text_field($input['schema_city'] ?? ''),
+        'schema_region'      => sanitize_text_field($input['schema_region'] ?? ''),
+        'schema_country'     => strtoupper(substr(preg_replace('/[^A-Za-z]/', '', (string) ($input['schema_country'] ?? '')), 0, 2)),
+        'schema_telephone'   => preg_replace('/[^0-9+()\/ .-]/', '', sanitize_text_field($input['schema_telephone'] ?? '')),
     ];
 }
 
@@ -347,35 +394,35 @@ function ohhol_sanitize_date($date) {
  * Render one holiday table row (used for saved entries; the JS template
  * for new rows lives in admin/admin.js and must be kept in sync).
  */
-function ohhol_render_holiday_row($index, $entry, $is_past) {
+function ohhol_render_holiday_row(int $index, array $entry, bool $is_past): void {
+    $n = 'ohhol_holidays[' . $index . ']';
     ?>
     <tr class="<?php echo $is_past ? 'ohhol-past' : ''; ?>">
-        <td>
-            <input type="date"
-                   name="ohhol_holidays[<?php echo (int) $index; ?>][date]"
-                   value="<?php echo esc_attr($entry['date']); ?>">
+        <td class="ohhol-holiday-dates">
+            <input type="date" name="<?php echo esc_attr($n); ?>[date]" value="<?php echo esc_attr($entry['date']); ?>" aria-label="<?php esc_attr_e('From', 'opening-hours-holidays'); ?>" required>
+            <span>–</span>
+            <input type="date" name="<?php echo esc_attr($n); ?>[date_end]" value="<?php echo esc_attr($entry['date_end']); ?>" aria-label="<?php esc_attr_e('To (optional)', 'opening-hours-holidays'); ?>">
+        </td>
+        <td class="ohhol-col-recurring">
+            <input type="checkbox" name="<?php echo esc_attr($n); ?>[recurring]" value="1" <?php checked($entry['recurring'], 1); ?> aria-label="<?php esc_attr_e('Every year', 'opening-hours-holidays'); ?>">
         </td>
         <td>
-            <select name="ohhol_holidays[<?php echo (int) $index; ?>][status]" class="ohhol-status-select">
+            <select name="<?php echo esc_attr($n); ?>[status]" class="ohhol-status-select">
                 <option value="closed" <?php selected($entry['status'], 'closed'); ?>><?php esc_html_e('Closed', 'opening-hours-holidays'); ?></option>
                 <option value="modified" <?php selected($entry['status'], 'modified'); ?>><?php esc_html_e('Modified hours', 'opening-hours-holidays'); ?></option>
             </select>
         </td>
         <td class="ohhol-holiday-times">
-            <input type="time" name="ohhol_holidays[<?php echo (int) $index; ?>][open1]" value="<?php echo esc_attr($entry['open1']); ?>" class="ohhol-time-input">
+            <input type="time" name="<?php echo esc_attr($n); ?>[open1]" value="<?php echo esc_attr($entry['open1']); ?>" class="ohhol-time-input">
             <span>–</span>
-            <input type="time" name="ohhol_holidays[<?php echo (int) $index; ?>][close1]" value="<?php echo esc_attr($entry['close1']); ?>" class="ohhol-time-input">
+            <input type="time" name="<?php echo esc_attr($n); ?>[close1]" value="<?php echo esc_attr($entry['close1']); ?>" class="ohhol-time-input">
             <span class="ohhol-window-sep">/</span>
-            <input type="time" name="ohhol_holidays[<?php echo (int) $index; ?>][open2]" value="<?php echo esc_attr($entry['open2']); ?>" class="ohhol-time-input">
+            <input type="time" name="<?php echo esc_attr($n); ?>[open2]" value="<?php echo esc_attr($entry['open2']); ?>" class="ohhol-time-input">
             <span>–</span>
-            <input type="time" name="ohhol_holidays[<?php echo (int) $index; ?>][close2]" value="<?php echo esc_attr($entry['close2']); ?>" class="ohhol-time-input">
+            <input type="time" name="<?php echo esc_attr($n); ?>[close2]" value="<?php echo esc_attr($entry['close2']); ?>" class="ohhol-time-input">
         </td>
         <td>
-            <input type="text"
-                   name="ohhol_holidays[<?php echo (int) $index; ?>][note]"
-                   value="<?php echo esc_attr($entry['note']); ?>"
-                   placeholder="<?php echo esc_attr__('e.g. Public holiday', 'opening-hours-holidays'); ?>"
-                   class="regular-text">
+            <input type="text" name="<?php echo esc_attr($n); ?>[note]" value="<?php echo esc_attr($entry['note']); ?>" placeholder="<?php echo esc_attr__('e.g. Public holiday', 'opening-hours-holidays'); ?>" class="regular-text">
         </td>
         <td>
             <button type="button" class="button ohhol-remove-row" aria-label="<?php echo esc_attr__('Remove entry', 'opening-hours-holidays'); ?>">×</button>
@@ -460,12 +507,13 @@ function ohhol_settings_page() {
             </table>
 
             <h2 class="ohhol-section"><?php esc_html_e('Holidays & exceptions', 'opening-hours-holidays'); ?></h2>
-            <p class="description"><?php esc_html_e('Public holidays, company holidays or deviating hours on specific dates. Entries more than 90 days in the past are removed automatically when saving.', 'opening-hours-holidays'); ?></p>
+            <p class="description"><?php esc_html_e('Public holidays, company holidays or deviating hours on specific dates. Fill in "to" for a date range (e.g. company holidays) and tick "Every year" for dates that repeat annually. One-off entries more than 90 days in the past are removed automatically when saving.', 'opening-hours-holidays'); ?></p>
 
             <table class="widefat ohhol-holidays-table">
                 <thead>
                     <tr>
-                        <th class="ohhol-col-date"><?php esc_html_e('Date', 'opening-hours-holidays'); ?></th>
+                        <th class="ohhol-col-date"><?php esc_html_e('Date (from – to)', 'opening-hours-holidays'); ?></th>
+                        <th class="ohhol-col-recurring"><?php esc_html_e('Every year', 'opening-hours-holidays'); ?></th>
                         <th class="ohhol-col-status"><?php esc_html_e('Status', 'opening-hours-holidays'); ?></th>
                         <th><?php esc_html_e('Hours (if modified)', 'opening-hours-holidays'); ?></th>
                         <th class="ohhol-col-note"><?php esc_html_e('Note', 'opening-hours-holidays'); ?></th>
@@ -474,7 +522,7 @@ function ohhol_settings_page() {
                 </thead>
                 <tbody id="ohhol-holidays-body" data-next-index="<?php echo esc_attr(count($holidays)); ?>">
                     <?php foreach ($holidays as $index => $entry):
-                        ohhol_render_holiday_row($index, $entry, $entry['date'] < $today);
+                        ohhol_render_holiday_row((int) $index, $entry, !$entry['recurring'] && ($entry['date_end'] ?: $entry['date']) < $today);
                     endforeach; ?>
                 </tbody>
             </table>
@@ -504,6 +552,14 @@ function ohhol_settings_page() {
                     </td>
                 </tr>
                 <tr>
+                    <th scope="row"><label for="ohhol-soon-minutes"><?php esc_html_e('"Opens soon / Closes soon"', 'opening-hours-holidays'); ?></label></th>
+                    <td>
+                        <input type="number" id="ohhol-soon-minutes" name="ohhol_options[soon_minutes]" value="<?php echo esc_attr((string) $options['soon_minutes']); ?>" min="0" max="240" step="5" class="small-text">
+                        <?php esc_html_e('minutes', 'opening-hours-holidays'); ?>
+                        <p class="description"><?php esc_html_e('The status badge shows "Opens soon" or "Closes soon" within this many minutes before a change. 0 disables the hint.', 'opening-hours-holidays'); ?></p>
+                    </td>
+                </tr>
+                <tr>
                     <th scope="row"><?php esc_html_e('Schema.org structured data', 'opening-hours-holidays'); ?></th>
                     <td>
                         <label>
@@ -513,16 +569,52 @@ function ohhol_settings_page() {
                                    <?php checked($options['schema_enabled'], 1); ?>>
                             <?php esc_html_e('Add LocalBusiness structured data (JSON-LD) with your opening hours to every page — helps search engines display your hours', 'opening-hours-holidays'); ?>
                         </label>
-                        <p style="margin-top: 10px;">
-                            <label for="ohhol-schema-name"><?php esc_html_e('Business name', 'opening-hours-holidays'); ?></label><br>
-                            <input type="text"
-                                   id="ohhol-schema-name"
-                                   name="ohhol_options[schema_name]"
-                                   value="<?php echo esc_attr($options['schema_name']); ?>"
-                                   class="regular-text"
-                                   placeholder="<?php echo esc_attr(get_bloginfo('name')); ?>">
-                        </p>
+                        <?php ohhol_render_schema_conflict_notice(); ?>
+                    </td>
+                </tr>
+                <tr class="ohhol-schema-field">
+                    <th scope="row"><label for="ohhol-schema-name"><?php esc_html_e('Business name', 'opening-hours-holidays'); ?></label></th>
+                    <td>
+                        <input type="text" id="ohhol-schema-name" name="ohhol_options[schema_name]" value="<?php echo esc_attr($options['schema_name']); ?>" class="regular-text" placeholder="<?php echo esc_attr(get_bloginfo('name')); ?>">
                         <p class="description"><?php esc_html_e('Leave empty to use the site title.', 'opening-hours-holidays'); ?></p>
+                    </td>
+                </tr>
+                <tr class="ohhol-schema-field">
+                    <th scope="row"><label for="ohhol-schema-type"><?php esc_html_e('Business type', 'opening-hours-holidays'); ?></label></th>
+                    <td>
+                        <select id="ohhol-schema-type" name="ohhol_options[schema_type]">
+                            <?php foreach (ohhol_get_schema_types() as $type => $label): ?>
+                                <option value="<?php echo esc_attr($type); ?>" <?php selected($options['schema_type'], $type); ?>><?php echo esc_html($label); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr class="ohhol-schema-field">
+                    <th scope="row"><?php esc_html_e('Address', 'opening-hours-holidays'); ?></th>
+                    <td>
+                        <p><input type="text" name="ohhol_options[schema_street]" value="<?php echo esc_attr($options['schema_street']); ?>" class="regular-text" placeholder="<?php esc_attr_e('Street and number', 'opening-hours-holidays'); ?>" aria-label="<?php esc_attr_e('Street and number', 'opening-hours-holidays'); ?>"></p>
+                        <p>
+                            <input type="text" name="ohhol_options[schema_postal_code]" value="<?php echo esc_attr($options['schema_postal_code']); ?>" class="small-text" placeholder="<?php esc_attr_e('Postal code', 'opening-hours-holidays'); ?>" aria-label="<?php esc_attr_e('Postal code', 'opening-hours-holidays'); ?>">
+                            <input type="text" name="ohhol_options[schema_city]" value="<?php echo esc_attr($options['schema_city']); ?>" placeholder="<?php esc_attr_e('City', 'opening-hours-holidays'); ?>" aria-label="<?php esc_attr_e('City', 'opening-hours-holidays'); ?>">
+                        </p>
+                        <p>
+                            <input type="text" name="ohhol_options[schema_region]" value="<?php echo esc_attr($options['schema_region']); ?>" placeholder="<?php esc_attr_e('Region / canton / state', 'opening-hours-holidays'); ?>" aria-label="<?php esc_attr_e('Region / canton / state', 'opening-hours-holidays'); ?>">
+                            <input type="text" name="ohhol_options[schema_country]" value="<?php echo esc_attr($options['schema_country']); ?>" class="small-text" maxlength="2" placeholder="CH" aria-label="<?php esc_attr_e('Country code (2 letters)', 'opening-hours-holidays'); ?>">
+                        </p>
+                        <p class="description"><?php esc_html_e('Search engines need an address to show your business with its hours. Country as a two-letter code, e.g. CH, DE, AT.', 'opening-hours-holidays'); ?></p>
+                    </td>
+                </tr>
+                <tr class="ohhol-schema-field">
+                    <th scope="row"><label for="ohhol-schema-telephone"><?php esc_html_e('Telephone', 'opening-hours-holidays'); ?></label></th>
+                    <td>
+                        <input type="tel" id="ohhol-schema-telephone" name="ohhol_options[schema_telephone]" value="<?php echo esc_attr($options['schema_telephone']); ?>" class="regular-text" placeholder="+41 44 123 45 67">
+                    </td>
+                </tr>
+                <tr class="ohhol-schema-field">
+                    <th scope="row"><?php esc_html_e('Output on', 'opening-hours-holidays'); ?></th>
+                    <td>
+                        <label><input type="radio" name="ohhol_options[schema_scope]" value="all" <?php checked($options['schema_scope'], 'all'); ?>> <?php esc_html_e('All pages', 'opening-hours-holidays'); ?></label><br>
+                        <label><input type="radio" name="ohhol_options[schema_scope]" value="front" <?php checked($options['schema_scope'], 'front'); ?>> <?php esc_html_e('Front page only', 'opening-hours-holidays'); ?></label>
                     </td>
                 </tr>
             </table>
@@ -632,6 +724,8 @@ function ohhol_settings_page() {
             <?php submit_button(__('Save settings', 'opening-hours-holidays')); ?>
         </form>
 
+        <?php ohhol_render_csv_section(); ?>
+
         <hr class="ohhol-section">
 
         <h2><?php esc_html_e('Shortcode reference', 'opening-hours-holidays'); ?></h2>
@@ -666,6 +760,17 @@ function ohhol_settings_page() {
                 <li><code>title="…"</code> – <?php esc_html_e('Optional title', 'opening-hours-holidays'); ?></li>
                 <li><code>title_tag="h3"</code> – <?php esc_html_e('HTML tag for the title (default: h3)', 'opening-hours-holidays'); ?></li>
             </ul>
+
+            <h3><?php esc_html_e('Conditional content', 'opening-hours-holidays'); ?></h3>
+            <code class="ohhol-doc-code">[opening_hours_if_open]…[/opening_hours_if_open]</code>
+            <code class="ohhol-doc-code">[opening_hours_if_closed]…[/opening_hours_if_closed]</code>
+            <p><?php esc_html_e('Shows the enclosed content only while the business is open or closed, e.g. a "Call us now" button. Works with page caching.', 'opening-hours-holidays'); ?></p>
+            <ul class="ohhol-doc-list">
+                <li><code>inline="1"</code> – <?php esc_html_e('Render inline (span) instead of as a block (div)', 'opening-hours-holidays'); ?></li>
+            </ul>
+
+            <h3><?php esc_html_e('Block editor', 'opening-hours-holidays'); ?></h3>
+            <p><?php esc_html_e('All views are also available as the "Opening Hours" block, including a live preview in the editor.', 'opening-hours-holidays'); ?></p>
 
             <p class="description">
                 <?php esc_html_e('The legacy shortcodes [oeffnungszeiten], [oeffnungszeiten_heute], [oeffnungszeiten_spezial] and [oeffnungszeiten_kompakt] keep working as aliases.', 'opening-hours-holidays'); ?>

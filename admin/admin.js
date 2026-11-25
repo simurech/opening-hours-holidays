@@ -14,7 +14,14 @@
         function holidayRow(index) {
             var n = 'ohhol_holidays[' + index + ']';
             return $('<tr>')
-                .append($('<td>').append($('<input>', { type: 'date', name: n + '[date]' })))
+                .append($('<td>', { 'class': 'ohhol-holiday-dates' })
+                    .append($('<input>', { type: 'date', name: n + '[date]', 'aria-label': i18n.fromLabel || '', required: true }))
+                    .append($('<span>').text('–'))
+                    .append($('<input>', { type: 'date', name: n + '[date_end]', 'aria-label': i18n.toLabel || '' }))
+                )
+                .append($('<td>', { 'class': 'ohhol-col-recurring' }).append(
+                    $('<input>', { type: 'checkbox', name: n + '[recurring]', value: '1', 'aria-label': i18n.yearlyLabel || '' })
+                ))
                 .append($('<td>').append(
                     $('<select>', { name: n + '[status]', 'class': 'ohhol-status-select' })
                         .append($('<option>', { value: 'closed', text: i18n.statusClosed || 'Closed' }))
@@ -93,6 +100,12 @@
                 $hint.remove();
             }
         }
+
+        // The "to" date can't be before the "from" date.
+        $(document).on('change', '.ohhol-holiday-dates input[name$="[date]"]', function () {
+            $(this).closest('td').find('input[name$="[date_end]"]').attr('min', this.value || null);
+        });
+        $('.ohhol-holiday-dates input[name$="[date]"]').trigger('change');
 
         $(document).on('change input', 'input.ohhol-time-input', function () {
             var name = $(this).attr('name') || '';

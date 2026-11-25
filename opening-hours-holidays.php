@@ -3,7 +3,7 @@
  * Plugin Name:       Opening Hours & Holidays
  * Plugin URI:        https://pulacha-labs.ch/plugins/opening-hours/
  * Description:       Manage regular opening hours and holiday exceptions, display them via shortcodes and add schema.org structured data for local SEO.
- * Version:           2.0.5
+ * Version:           2.1.0
  * Requires at least: 6.6
  * Requires PHP:      7.4
  * Author:            Pulacha Labs
@@ -18,13 +18,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('OHHOL_VERSION', '2.0.5');
+define('OHHOL_VERSION', '2.1.0');
 define('OHHOL_PATH', plugin_dir_path(__FILE__));
 define('OHHOL_URL', plugin_dir_url(__FILE__));
 
 require_once OHHOL_PATH . 'includes/settings.php';
+require_once OHHOL_PATH . 'includes/holidays.php';
 require_once OHHOL_PATH . 'includes/shortcodes.php';
 require_once OHHOL_PATH . 'includes/schema.php';
+require_once OHHOL_PATH . 'includes/csv.php';
+require_once OHHOL_PATH . 'includes/block.php';
 
 /**
  * Admin assets (settings page only).
@@ -42,6 +45,9 @@ function ohhol_admin_assets($hook): void {
         'notePlaceholder' => __('e.g. Public holiday', 'opening-hours-holidays'),
         'removeLabel'     => __('Remove entry', 'opening-hours-holidays'),
         'nextDay'         => __('Ends on the following day', 'opening-hours-holidays'),
+        'fromLabel'       => __('From', 'opening-hours-holidays'),
+        'toLabel'         => __('To (optional)', 'opening-hours-holidays'),
+        'yearlyLabel'     => __('Every year', 'opening-hours-holidays'),
     ]);
 }
 add_action('admin_enqueue_scripts', 'ohhol_admin_assets');

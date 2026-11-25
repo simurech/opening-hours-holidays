@@ -1,10 +1,10 @@
 === Opening Hours & Holidays ===
 Contributors: simon61
-Tags: opening hours, business hours, holidays, local seo, shortcode
+Tags: opening hours, business hours, holidays, local seo, block
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.5
+Stable tag: 2.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,14 +17,17 @@ Copying opening hours into your theme's footer, then updating them by hand every
 **Features**
 
 * Regular opening hours per weekday, with up to two time windows per day (e.g. morning and afternoon) — also past midnight
-* Times follow your site's time format (12/24 hours) and first day of the week
-* Holiday exceptions: closed days or modified hours for specific dates, with an optional note
-* Four shortcodes for different layouts: full weekly table, today only, upcoming holidays, and a compact list for footers or sidebars
-* "Open now / Currently closed" badge that updates live
+* Holiday exceptions: closed days or modified hours for single dates or **date ranges** (e.g. company holidays), optionally **repeating every year**
+* **CSV import & export** for holidays — import a list of public holidays from a spreadsheet in seconds (template included)
+* **"Opening Hours" block** for the block editor with live preview, plus five shortcodes
+* "Open now / Currently closed" badge with **"Opens soon / Closes soon"** hint, updated live without reloading
+* **Conditional content**: show text or buttons only while you are open or closed
 * Compatible with full-page caching (LiteSpeed Cache, WP Rocket and others) — the current day, badge and holiday filtering are applied in the browser
 * Correct time zone handling: the status always reflects your business's local time, even for international visitors
-* Optional schema.org LocalBusiness structured data (JSON-LD) with your opening hours for local SEO
+* Times follow your site's time format (12/24 hours) and first day of the week
+* Optional schema.org structured data (JSON-LD) for local SEO: business type, address, telephone, regular and holiday hours
 * Customizable colors (badges, zebra stripes, text) — font and primary colors are inherited from your theme
+* No external requests, no tracking, no upsell
 
 **Shortcodes**
 
@@ -32,10 +35,16 @@ Copying opening hours into your theme's footer, then updating them by hand every
 * `[opening_hours_today]` — today's hours with optional status badge
 * `[opening_hours_holidays]` — upcoming holidays/exceptions. Attributes: `days` (default 30), `limit`, `title`, `title_tag`
 * `[opening_hours_compact]` — compact list, consecutive days with identical hours are grouped. Attributes: `status`, `title`, `title_tag`
+* `[opening_hours_if_open]…[/opening_hours_if_open]` and `[opening_hours_if_closed]…[/opening_hours_if_closed]` — content shown only while open or closed. Attribute: `inline`
+
+All views are also available as the **Opening Hours** block.
 
 **Developers**
 
-The schema.org output can be extended via the `ohhol_schema_data` filter, e.g. to add your address, telephone number or a more specific business type.
+* `ohhol_schema_data` — filter the schema.org array, e.g. to add geo coordinates or a logo
+* `ohhol_output_schema` — return false to skip the JSON-LD block on specific pages
+* `ohhol_schema_conflicts` — adjust the detection of other plugins that output LocalBusiness data
+* `ohhol_time_format` — change the PHP date format used to display times
 
 == Installation ==
 
@@ -62,6 +71,18 @@ Add an entry under "Holidays & exceptions" with the date, choose "Closed" or "Mo
 
 Optionally, yes. Enable "Schema.org structured data" in the settings and the plugin outputs a LocalBusiness JSON-LD block with your regular hours and upcoming exceptions.
 
+= How do I import public holidays? =
+
+Under "Opening Hours", download the CSV template, fill in column A (date, e.g. 25.12.2026 or 2026-12-25) and column B (title), then upload it. You'll see a preview before anything is saved. The export contains all fields (ranges, modified hours, "every year") and can be imported again.
+
+= Can I show a "Call us now" button only during opening hours? =
+
+Yes: `[opening_hours_if_open]Call us now: …[/opening_hours_if_open]`. The content is shown or hidden in the browser, so it also works with page caching.
+
+= Another SEO plugin already outputs LocalBusiness data. What should I do? =
+
+The settings page shows a hint when Yoast Local SEO or Rank Math Local SEO is active. Enable structured data in only one plugin to avoid duplicate data.
+
 = Can I manage opening hours for more than one location? =
 
 Not currently. The plugin manages a single set of opening hours and holidays per site.
@@ -72,11 +93,22 @@ No, this plugin is free and self-contained. There are no paid upgrades or premiu
 
 == Screenshots ==
 
-1. Settings page with weekly hours and holiday exceptions
-2. Weekly overview shortcode with highlighted current day
-3. Compact list with status badge
+1. Weekly table with today highlighted and an upcoming holiday shown inline
+2. Compact list for footers and sidebars with the live "Open now" badge
+3. Settings: regular hours with two time windows per day
+4. Holidays & exceptions with date ranges, yearly entries and CSV import
+5. The "Opening Hours" block with live preview in the block editor
 
 == Changelog ==
+
+= 2.1.0 =
+* New: "Opening Hours" block for the block editor (all four views, live preview)
+* New: holidays and exceptions as date ranges (e.g. company holidays) and as yearly recurring entries
+* New: CSV import with preview (template: date + title) and CSV export of all entries
+* New: conditional content with `[opening_hours_if_open]` and `[opening_hours_if_closed]` (works with page caching)
+* New: "Opens soon / Closes soon" hint in the status badge (threshold configurable)
+* New: business type, address and telephone for the schema.org data, output on all pages or the front page only, hint when Yoast Local SEO or Rank Math Local SEO is active
+* The `status` attribute of `[opening_hours_compact]` and `[opening_hours_today]` now overrides the global "Open now" option in both directions
 
 = 2.0.5 =
 * Minimum PHP version lowered to 7.4 again (the plugin does not need newer PHP features); minimum WordPress version is now 6.6
@@ -125,6 +157,9 @@ No, this plugin is free and self-contained. There are no paid upgrades or premiu
 * Today marker and status badge rendered via JavaScript (caching-compatible), business time zone used instead of the visitor's local time
 
 == Upgrade Notice ==
+
+= 2.1.0 =
+New block, holiday date ranges and yearly entries, CSV import/export, conditional content and richer schema.org data. Existing settings and shortcodes keep working.
 
 = 2.0.5 =
 Runs on PHP 7.4+ again and requires WordPress 6.6+. Supports hours past midnight, the site's 12/24-hour time format and fixes a hidden paragraph before shortcodes.

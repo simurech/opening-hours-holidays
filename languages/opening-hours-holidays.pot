@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Opening Hours & Holidays 2.0.5\n"
+"Project-Id-Version: Opening Hours & Holidays 2.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/opening-hours-holidays\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-25T11:04:55+00:00\n"
+"POT-Creation-Date: 2026-11-25T11:20:09+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: opening-hours-holidays\n"
@@ -39,9 +39,308 @@ msgstr ""
 msgid "https://pulacha-labs.ch/"
 msgstr ""
 
+#: includes/csv.php:39
+msgid "Sorry, you are not allowed to do that."
+msgstr ""
+
+#: includes/csv.php:92
+#: includes/csv.php:309
+msgctxt "CSV status value"
+msgid "closed"
+msgstr ""
+
+#: includes/csv.php:93
+#: includes/csv.php:308
+msgctxt "CSV status value"
+msgid "modified"
+msgstr ""
+
+#: includes/csv.php:94
+#: includes/csv.php:314
+msgctxt "CSV yes value"
+msgid "yes"
+msgstr ""
+
+#: includes/csv.php:169
+msgid "Too many rows (maximum 1000)"
+msgstr ""
+
+#: includes/csv.php:179
+msgid "Invalid or missing date in column A"
+msgstr ""
+
+#: includes/csv.php:187
+msgid "Invalid \"to\" date in column C"
+msgstr ""
+
+#: includes/csv.php:191
+msgid "The \"to\" date is before the start date"
+msgstr ""
+
+#: includes/csv.php:201
+msgid "More than 90 days in the past"
+msgstr ""
+
+#: includes/csv.php:208
+msgid "Unknown status in column D (use \"closed\" or \"modified\")"
+msgstr ""
+
+#: includes/csv.php:220
+msgid "Status \"modified\" needs opening hours in columns E and F"
+msgstr ""
+
+#: includes/csv.php:277
+#: includes/csv.php:292
+#: includes/csv.php:430
+msgid "Date"
+msgstr ""
+
+#: includes/csv.php:277
+#: includes/csv.php:293
+#: includes/csv.php:431
+#: blocks/opening-hours/index.js:39
+msgid "Title"
+msgstr ""
+
+#: includes/csv.php:278
+msgid "New Year's Day"
+msgstr ""
+
+#: includes/csv.php:279
+msgid "Christmas Day"
+msgstr ""
+
+#: includes/csv.php:280
+msgid "Boxing Day"
+msgstr ""
+
+#: includes/csv.php:294
+msgid "To"
+msgstr ""
+
+#: includes/csv.php:295
+#: includes/csv.php:432
+#: includes/settings.php:517
+msgid "Status"
+msgstr ""
+
+#: includes/csv.php:296
+msgid "From 1"
+msgstr ""
+
+#: includes/csv.php:297
+msgid "To 1"
+msgstr ""
+
+#: includes/csv.php:298
+msgid "From 2"
+msgstr ""
+
+#: includes/csv.php:299
+msgid "To 2"
+msgstr ""
+
+#: includes/csv.php:300
+#: includes/csv.php:433
+#: includes/settings.php:407
+#: includes/settings.php:516
+#: opening-hours-holidays.php:50
+msgid "Every year"
+msgstr ""
+
+#: includes/csv.php:333
+msgid "Please choose a CSV file to upload."
+msgstr ""
+
+#: includes/csv.php:335
+msgid "The file is too large (maximum 1 MB)."
+msgstr ""
+
+#: includes/csv.php:337
+msgid "Please upload a .csv file."
+msgstr ""
+
+#: includes/csv.php:344
+msgid "The file does not contain any entries."
+msgstr ""
+
+#. translators: %d: number of imported entries
+#: includes/csv.php:388
+#, php-format
+msgid "%d entry imported."
+msgid_plural "%d entries imported."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/csv.php:409
+msgid "Import & export holidays (CSV)"
+msgstr ""
+
+#: includes/csv.php:416
+msgid "Preview"
+msgstr ""
+
+#. translators: 1: number of valid rows, 2: number of skipped rows
+#: includes/csv.php:421
+#, php-format
+msgid "%1$d valid entries, %2$d skipped rows. Nothing has been saved yet."
+msgstr ""
+
+#: includes/csv.php:452
+#: includes/settings.php:411
+#: includes/shortcodes.php:173
+#: includes/shortcodes.php:290
+#: includes/shortcodes.php:342
+#: includes/shortcodes.php:363
+#: includes/shortcodes.php:453
+#: includes/shortcodes.php:543
+#: opening-hours-holidays.php:43
+msgid "Closed"
+msgstr ""
+
+#: includes/csv.php:455
+msgid "Yes"
+msgstr ""
+
+#. translators: 1: line number, 2: reason, 3: line content
+#: includes/csv.php:464
+#, php-format
+msgid "Line %1$d skipped: %2$s – \"%3$s\""
+msgstr ""
+
+#: includes/csv.php:481
+msgid "Replace all existing entries (otherwise entries are added and entries with the same date are overwritten)"
+msgstr ""
+
+#: includes/csv.php:486
+msgid "Import entries"
+msgstr ""
+
+#: includes/csv.php:488
+msgid "Cancel"
+msgstr ""
+
+#: includes/csv.php:493
+msgid "Import many dates at once, e.g. public holidays from a spreadsheet. Column A: date (25.12.2026 or 2026-12-25), column B: title. Every row is imported as \"Closed\". The export contains all fields and can be imported again."
+msgstr ""
+
+#: includes/csv.php:496
+msgid "Download template"
+msgstr ""
+
+#: includes/csv.php:497
+msgid "Export entries"
+msgstr ""
+
+#: includes/csv.php:503
+msgid "CSV file"
+msgstr ""
+
+#: includes/csv.php:505
+msgid "Upload and preview"
+msgstr ""
+
+#: includes/schema.php:15
+msgid "Local business (generic)"
+msgstr ""
+
+#: includes/schema.php:16
+msgid "Store / shop"
+msgstr ""
+
+#: includes/schema.php:17
+msgid "Restaurant"
+msgstr ""
+
+#: includes/schema.php:18
+msgid "Café"
+msgstr ""
+
+#: includes/schema.php:19
+msgid "Bakery"
+msgstr ""
+
+#: includes/schema.php:20
+msgid "Bar / pub"
+msgstr ""
+
+#: includes/schema.php:21
+msgid "Food establishment (other)"
+msgstr ""
+
+#: includes/schema.php:22
+msgid "Hair salon"
+msgstr ""
+
+#: includes/schema.php:23
+msgid "Beauty salon"
+msgstr ""
+
+#: includes/schema.php:24
+msgid "Health & beauty business"
+msgstr ""
+
+#: includes/schema.php:25
+msgid "Medical practice"
+msgstr ""
+
+#: includes/schema.php:26
+msgid "Dentist"
+msgstr ""
+
+#: includes/schema.php:27
+msgid "Pharmacy"
+msgstr ""
+
+#: includes/schema.php:28
+msgid "Car repair / garage"
+msgstr ""
+
+#: includes/schema.php:29
+msgid "Trades & construction"
+msgstr ""
+
+#: includes/schema.php:30
+msgid "Professional service"
+msgstr ""
+
+#: includes/schema.php:31
+msgid "Legal service"
+msgstr ""
+
+#: includes/schema.php:32
+msgid "Financial service"
+msgstr ""
+
+#: includes/schema.php:33
+msgid "Real estate agent"
+msgstr ""
+
+#: includes/schema.php:34
+msgid "Sports / fitness"
+msgstr ""
+
+#: includes/schema.php:35
+msgid "Hotel / lodging"
+msgstr ""
+
+#: includes/schema.php:36
+msgid "Library"
+msgstr ""
+
+#: includes/schema.php:37
+msgid "Government office"
+msgstr ""
+
+#. translators: %s: plugin name(s), e.g. "Yoast Local SEO"
+#: includes/schema.php:74
+#, php-format
+msgid "%s is active and may already output LocalBusiness structured data. To avoid duplicate data for search engines, enable only one of them – or keep ours disabled and add your opening hours there."
+msgstr ""
+
 #: includes/settings.php:15
 #: includes/settings.php:16
-#: includes/settings.php:403
+#: includes/settings.php:450
 msgid "Opening Hours"
 msgstr ""
 
@@ -73,310 +372,462 @@ msgstr ""
 msgid "Sunday"
 msgstr ""
 
-#: includes/settings.php:229
+#: includes/settings.php:249
 msgid "Some opening hours were incomplete or started and ended at the same time and have been removed. Please check your weekly hours."
 msgstr ""
 
-#: includes/settings.php:278
-msgid "Some holiday hours were incomplete and have been removed. Please check your exceptions."
+#: includes/settings.php:314
+msgid "Some holiday entries were incomplete or too long (maximum one year) and have been adjusted. Please check your exceptions."
 msgstr ""
 
-#: includes/settings.php:360
-#: includes/shortcodes.php:169
-#: includes/shortcodes.php:286
-#: includes/shortcodes.php:341
-#: includes/shortcodes.php:419
-#: includes/shortcodes.php:506
-#: opening-hours-holidays.php:40
-msgid "Closed"
+#: includes/settings.php:402
+#: opening-hours-holidays.php:48
+msgid "From"
 msgstr ""
 
-#: includes/settings.php:361
-#: opening-hours-holidays.php:41
+#: includes/settings.php:404
+#: opening-hours-holidays.php:49
+msgid "To (optional)"
+msgstr ""
+
+#: includes/settings.php:412
+#: opening-hours-holidays.php:44
 msgid "Modified hours"
 msgstr ""
 
-#: includes/settings.php:377
-#: opening-hours-holidays.php:42
+#: includes/settings.php:425
+#: opening-hours-holidays.php:45
 msgid "e.g. Public holiday"
 msgstr ""
 
-#: includes/settings.php:381
-#: opening-hours-holidays.php:43
+#: includes/settings.php:428
+#: opening-hours-holidays.php:46
 msgid "Remove entry"
 msgstr ""
 
-#: includes/settings.php:409
+#: includes/settings.php:456
 msgid "Regular opening hours"
 msgstr ""
 
-#: includes/settings.php:410
+#: includes/settings.php:457
 msgid "Times are shown in the time format and week order configured under Settings → General. A closing time earlier than the opening time ends on the following day (e.g. 22:00 – 02:00)."
 msgstr ""
 
-#: includes/settings.php:414
+#: includes/settings.php:461
 msgid "Day"
 msgstr ""
 
-#: includes/settings.php:415
+#: includes/settings.php:462
 msgid "Open"
 msgstr ""
 
-#: includes/settings.php:416
+#: includes/settings.php:463
 msgid "Time window 1 (e.g. morning)"
 msgstr ""
 
-#: includes/settings.php:417
+#: includes/settings.php:464
 msgid "Time window 2 (e.g. afternoon)"
 msgstr ""
 
-#: includes/settings.php:455
+#: includes/settings.php:502
 msgid "Leave empty if there is no break"
 msgstr ""
 
-#: includes/settings.php:462
-#: includes/settings.php:651
+#: includes/settings.php:509
+#: includes/settings.php:745
+#: blocks/opening-hours/index.js:27
 msgid "Holidays & exceptions"
 msgstr ""
 
-#: includes/settings.php:463
-msgid "Public holidays, company holidays or deviating hours on specific dates. Entries more than 90 days in the past are removed automatically when saving."
+#: includes/settings.php:510
+msgid "Public holidays, company holidays or deviating hours on specific dates. Fill in \"to\" for a date range (e.g. company holidays) and tick \"Every year\" for dates that repeat annually. One-off entries more than 90 days in the past are removed automatically when saving."
 msgstr ""
 
-#: includes/settings.php:468
-msgid "Date"
+#: includes/settings.php:515
+msgid "Date (from – to)"
 msgstr ""
 
-#: includes/settings.php:469
-msgid "Status"
-msgstr ""
-
-#: includes/settings.php:470
+#: includes/settings.php:518
 msgid "Hours (if modified)"
 msgstr ""
 
-#: includes/settings.php:471
+#: includes/settings.php:519
 msgid "Note"
 msgstr ""
 
-#: includes/settings.php:483
+#: includes/settings.php:531
 msgid "Add entry"
 msgstr ""
 
-#: includes/settings.php:486
+#: includes/settings.php:534
 msgid "Options"
 msgstr ""
 
-#: includes/settings.php:489
+#: includes/settings.php:537
+#: blocks/opening-hours/index.js:58
 msgid "Show \"Open now\" status"
 msgstr ""
 
 #. translators: %s: shortcode name
-#: includes/settings.php:499
+#: includes/settings.php:547
 #, php-format
 msgid "Show whether the business is currently open in the %s shortcode"
 msgstr ""
 
-#: includes/settings.php:507
-msgid "Schema.org structured data"
-msgstr ""
-
-#: includes/settings.php:514
-msgid "Add LocalBusiness structured data (JSON-LD) with your opening hours to every page — helps search engines display your hours"
-msgstr ""
-
-#: includes/settings.php:517
-msgid "Business name"
-msgstr ""
-
-#: includes/settings.php:525
-msgid "Leave empty to use the site title."
-msgstr ""
-
-#: includes/settings.php:530
-msgid "Design"
-msgstr ""
-
-#: includes/settings.php:532
-msgid "Font and primary text color are inherited from your theme. The colors below can be customized."
-msgstr ""
-
-#: includes/settings.php:535
-msgid "Text & table"
-msgstr ""
-
-#: includes/settings.php:538
-msgid "Muted text color"
-msgstr ""
-
-#: includes/settings.php:542
-msgid "Used for times and secondary information (default: #666666)"
-msgstr ""
-
-#: includes/settings.php:546
-msgid "Faint text color"
-msgstr ""
-
-#: includes/settings.php:550
-msgid "Used for notes and additions in brackets (default: #999999)"
-msgstr ""
-
-#: includes/settings.php:554
-msgid "Zebra stripes"
+#: includes/settings.php:555
+msgid "\"Opens soon / Closes soon\""
 msgstr ""
 
 #: includes/settings.php:558
-msgid "Add a background color to odd rows"
+msgid "minutes"
+msgstr ""
+
+#: includes/settings.php:559
+msgid "The status badge shows \"Opens soon\" or \"Closes soon\" within this many minutes before a change. 0 disables the hint."
 msgstr ""
 
 #: includes/settings.php:563
-msgid "Zebra stripe color"
+msgid "Schema.org structured data"
 msgstr ""
 
-#: includes/settings.php:571
-msgid "\"Today\" marker"
+#: includes/settings.php:570
+msgid "Add LocalBusiness structured data (JSON-LD) with your opening hours to every page — helps search engines display your hours"
 msgstr ""
 
-#: includes/settings.php:574
-msgid "Background color"
+#: includes/settings.php:576
+msgid "Business name"
 msgstr ""
 
-#: includes/settings.php:581
-msgid "Text color"
+#: includes/settings.php:579
+msgid "Leave empty to use the site title."
 msgstr ""
 
-#: includes/settings.php:589
-msgid "Status colors"
+#: includes/settings.php:583
+msgid "Business type"
 msgstr ""
 
-#: includes/settings.php:592
-msgid "\"Closed\" text color"
+#: includes/settings.php:593
+msgid "Address"
 msgstr ""
 
-#: includes/settings.php:599
-msgid "\"Open now\" badge"
+#: includes/settings.php:595
+msgid "Street and number"
+msgstr ""
+
+#: includes/settings.php:597
+msgid "Postal code"
+msgstr ""
+
+#: includes/settings.php:598
+msgid "City"
 msgstr ""
 
 #: includes/settings.php:601
+msgid "Region / canton / state"
+msgstr ""
+
+#: includes/settings.php:602
+msgid "Country code (2 letters)"
+msgstr ""
+
+#: includes/settings.php:604
+msgid "Search engines need an address to show your business with its hours. Country as a two-letter code, e.g. CH, DE, AT."
+msgstr ""
+
+#: includes/settings.php:608
+msgid "Telephone"
+msgstr ""
+
+#: includes/settings.php:614
+msgid "Output on"
+msgstr ""
+
+#: includes/settings.php:616
+msgid "All pages"
+msgstr ""
+
 #: includes/settings.php:617
-msgid "Background"
+msgid "Front page only"
 msgstr ""
 
-#: includes/settings.php:605
-#: includes/settings.php:621
-msgid "Text"
+#: includes/settings.php:622
+msgid "Design"
 msgstr ""
 
-#: includes/settings.php:609
-#: includes/settings.php:625
-msgid "Dot"
+#: includes/settings.php:624
+msgid "Font and primary text color are inherited from your theme. The colors below can be customized."
 msgstr ""
 
-#: includes/settings.php:615
-msgid "\"Currently closed\" badge"
+#: includes/settings.php:627
+msgid "Text & table"
 msgstr ""
 
-#: includes/settings.php:632
-msgid "Save settings"
+#: includes/settings.php:630
+msgid "Muted text color"
 msgstr ""
 
-#: includes/settings.php:637
-msgid "Shortcode reference"
+#: includes/settings.php:634
+msgid "Used for times and secondary information (default: #666666)"
 msgstr ""
 
-#: includes/settings.php:639
-msgid "Weekly overview"
+#: includes/settings.php:638
+msgid "Faint text color"
 msgstr ""
 
-#: includes/settings.php:641
-msgid "Shows a table with all weekdays and the regular opening hours. The current day is highlighted."
+#: includes/settings.php:642
+msgid "Used for notes and additions in brackets (default: #999999)"
 msgstr ""
 
-#: includes/settings.php:643
-msgid "Optional title above the table"
+#: includes/settings.php:646
+msgid "Zebra stripes"
 msgstr ""
 
-#: includes/settings.php:644
-#: includes/settings.php:658
-msgid "HTML tag for the title (default: h2)"
-msgstr ""
-
-#: includes/settings.php:647
-#: includes/shortcodes.php:172
-msgid "Today"
-msgstr ""
-
-#: includes/settings.php:649
-msgid "Shows only the current day. Holiday exceptions are applied automatically."
-msgstr ""
-
-#: includes/settings.php:653
-msgid "Shows upcoming holidays and exceptions."
+#: includes/settings.php:650
+msgid "Add a background color to odd rows"
 msgstr ""
 
 #: includes/settings.php:655
-msgid "Only entries up to X days in the future (default: 30)"
-msgstr ""
-
-#: includes/settings.php:656
-msgid "Maximum number of entries (optional)"
-msgstr ""
-
-#: includes/settings.php:657
-msgid "Optional title (only shown if there are entries)"
-msgstr ""
-
-#: includes/settings.php:661
-msgid "Compact overview (footer/sidebar)"
+msgid "Zebra stripe color"
 msgstr ""
 
 #: includes/settings.php:663
-msgid "Space-saving list. Consecutive days with identical hours are grouped automatically (e.g. \"Monday – Friday\")."
-msgstr ""
-
-#: includes/settings.php:665
-msgid "Show the \"Open now / Currently closed\" badge"
+msgid "\"Today\" marker"
 msgstr ""
 
 #: includes/settings.php:666
+msgid "Background color"
+msgstr ""
+
+#: includes/settings.php:673
+msgid "Text color"
+msgstr ""
+
+#: includes/settings.php:681
+msgid "Status colors"
+msgstr ""
+
+#: includes/settings.php:684
+msgid "\"Closed\" text color"
+msgstr ""
+
+#: includes/settings.php:691
+msgid "\"Open now\" badge"
+msgstr ""
+
+#: includes/settings.php:693
+#: includes/settings.php:709
+msgid "Background"
+msgstr ""
+
+#: includes/settings.php:697
+#: includes/settings.php:713
+msgid "Text"
+msgstr ""
+
+#: includes/settings.php:701
+#: includes/settings.php:717
+msgid "Dot"
+msgstr ""
+
+#: includes/settings.php:707
+msgid "\"Currently closed\" badge"
+msgstr ""
+
+#: includes/settings.php:724
+msgid "Save settings"
+msgstr ""
+
+#: includes/settings.php:731
+msgid "Shortcode reference"
+msgstr ""
+
+#: includes/settings.php:733
+#: blocks/opening-hours/index.js:25
+msgid "Weekly overview"
+msgstr ""
+
+#: includes/settings.php:735
+msgid "Shows a table with all weekdays and the regular opening hours. The current day is highlighted."
+msgstr ""
+
+#: includes/settings.php:737
+msgid "Optional title above the table"
+msgstr ""
+
+#: includes/settings.php:738
+#: includes/settings.php:752
+msgid "HTML tag for the title (default: h2)"
+msgstr ""
+
+#: includes/settings.php:741
+#: includes/shortcodes.php:176
+#: blocks/opening-hours/index.js:26
+msgid "Today"
+msgstr ""
+
+#: includes/settings.php:743
+msgid "Shows only the current day. Holiday exceptions are applied automatically."
+msgstr ""
+
+#: includes/settings.php:747
+msgid "Shows upcoming holidays and exceptions."
+msgstr ""
+
+#: includes/settings.php:749
+msgid "Only entries up to X days in the future (default: 30)"
+msgstr ""
+
+#: includes/settings.php:750
+msgid "Maximum number of entries (optional)"
+msgstr ""
+
+#: includes/settings.php:751
+msgid "Optional title (only shown if there are entries)"
+msgstr ""
+
+#: includes/settings.php:755
+#: blocks/opening-hours/index.js:28
+msgid "Compact overview (footer/sidebar)"
+msgstr ""
+
+#: includes/settings.php:757
+msgid "Space-saving list. Consecutive days with identical hours are grouped automatically (e.g. \"Monday – Friday\")."
+msgstr ""
+
+#: includes/settings.php:759
+msgid "Show the \"Open now / Currently closed\" badge"
+msgstr ""
+
+#: includes/settings.php:760
 msgid "Optional title"
 msgstr ""
 
-#: includes/settings.php:667
+#: includes/settings.php:761
 msgid "HTML tag for the title (default: h3)"
 msgstr ""
 
-#: includes/settings.php:671
+#: includes/settings.php:764
+msgid "Conditional content"
+msgstr ""
+
+#: includes/settings.php:767
+msgid "Shows the enclosed content only while the business is open or closed, e.g. a \"Call us now\" button. Works with page caching."
+msgstr ""
+
+#: includes/settings.php:769
+msgid "Render inline (span) instead of as a block (div)"
+msgstr ""
+
+#: includes/settings.php:772
+msgid "Block editor"
+msgstr ""
+
+#: includes/settings.php:773
+msgid "All views are also available as the \"Opening Hours\" block, including a live preview in the editor."
+msgstr ""
+
+#: includes/settings.php:776
 msgid "The legacy shortcodes [oeffnungszeiten], [oeffnungszeiten_heute], [oeffnungszeiten_spezial] and [oeffnungszeiten_kompakt] keep working as aliases."
 msgstr ""
 
-#: includes/shortcodes.php:170
+#: includes/shortcodes.php:171
+#: includes/shortcodes.php:571
+msgid "Closes soon"
+msgstr ""
+
+#: includes/shortcodes.php:172
+#: includes/shortcodes.php:576
+msgid "Opens soon"
+msgstr ""
+
+#: includes/shortcodes.php:174
+#: includes/shortcodes.php:572
 msgid "Open now"
 msgstr ""
 
-#: includes/shortcodes.php:171
+#: includes/shortcodes.php:175
+#: includes/shortcodes.php:577
 msgid "Currently closed"
 msgstr ""
 
 #. translators: prefix shown before the regular hours when a holiday exception applies
-#: includes/shortcodes.php:174
+#: includes/shortcodes.php:178
 msgid "Regular:"
 msgstr ""
 
-#: includes/shortcodes.php:274
+#: includes/shortcodes.php:278
 msgid "Weekly opening hours"
 msgstr ""
 
 #. translators: date format for holiday entries, see https://www.php.net/manual/datetime.format.php
-#: includes/shortcodes.php:396
+#: includes/shortcodes.php:417
 msgctxt "holiday date format"
 msgid "l, F j, Y"
 msgstr ""
 
-#: includes/shortcodes.php:406
+#: includes/shortcodes.php:430
 msgid "Upcoming holidays and exceptions"
 msgstr ""
 
-#: opening-hours-holidays.php:44
+#: opening-hours-holidays.php:47
 msgid "Ends on the following day"
+msgstr ""
+
+#: blocks/opening-hours/index.js:22
+msgid "View"
+msgstr ""
+
+#: blocks/opening-hours/index.js:46
+msgid "Title level"
+msgstr ""
+
+#: blocks/opening-hours/index.js:69
+msgid "Days ahead"
+msgstr ""
+
+#: blocks/opening-hours/index.js:78
+msgid "Maximum number of entries (0 = all)"
+msgstr ""
+
+#: blocks/opening-hours/index.js:90
+msgid "Settings"
+msgstr ""
+
+#: blocks/opening-hours/index.js:99
+msgid "No upcoming holidays or exceptions."
+msgstr ""
+
+#: blocks/opening-hours/block.json
+msgctxt "block title"
+msgid "Opening Hours"
+msgstr ""
+
+#: blocks/opening-hours/block.json
+msgctxt "block description"
+msgid "Show your opening hours, today's hours, upcoming holidays or a compact list with live status."
+msgstr ""
+
+#: blocks/opening-hours/block.json
+msgctxt "block keyword"
+msgid "hours"
+msgstr ""
+
+#: blocks/opening-hours/block.json
+msgctxt "block keyword"
+msgid "business hours"
+msgstr ""
+
+#: blocks/opening-hours/block.json
+msgctxt "block keyword"
+msgid "holidays"
+msgstr ""
+
+#: blocks/opening-hours/block.json
+msgctxt "block keyword"
+msgid "open"
+msgstr ""
+
+#: blocks/opening-hours/block.json
+msgctxt "block keyword"
+msgid "schedule"
 msgstr ""
