@@ -1,10 +1,10 @@
 === Opening Hours & Holidays ===
 Contributors: simon61
 Tags: opening hours, business hours, holidays, local seo, shortcode
-Requires at least: 5.8
+Requires at least: 6.6
 Tested up to: 7.1
-Requires PHP: 8.3
-Stable tag: 2.0.4
+Requires PHP: 7.4
+Stable tag: 2.0.5
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,10 +16,11 @@ Copying opening hours into your theme's footer, then updating them by hand every
 
 **Features**
 
-* Regular opening hours per weekday, with up to two time windows per day (e.g. morning and afternoon)
+* Regular opening hours per weekday, with up to two time windows per day (e.g. morning and afternoon) — also past midnight
+* Times follow your site's time format (12/24 hours) and first day of the week
 * Holiday exceptions: closed days or modified hours for specific dates, with an optional note
 * Four shortcodes for different layouts: full weekly table, today only, upcoming holidays, and a compact list for footers or sidebars
-* "Open now / Currently closed" badge
+* "Open now / Currently closed" badge that updates live
 * Compatible with full-page caching (LiteSpeed Cache, WP Rocket and others) — the current day, badge and holiday filtering are applied in the browser
 * Correct time zone handling: the status always reflects your business's local time, even for international visitors
 * Optional schema.org LocalBusiness structured data (JSON-LD) with your opening hours for local SEO
@@ -77,6 +78,17 @@ No, this plugin is free and self-contained. There are no paid upgrades or premiu
 
 == Changelog ==
 
+= 2.0.5 =
+* Minimum PHP version lowered to 7.4 again (the plugin does not need newer PHP features); minimum WordPress version is now 6.6
+* Fix: a paragraph directly before a shortcode was hidden by the stylesheet
+* New: opening hours past midnight (e.g. 22:00 – 02:00) are supported, incl. the "Open now" status
+* New: times follow the site's time format (12/24 hours) and the weekly table starts on the configured first day of the week
+* The "Open now / Currently closed" badge now updates every minute without reloading the page
+* Incomplete time windows are detected, removed on save and reported; the settings page now shows the "Settings saved" notice
+* Times of closed days are kept when a day is switched off
+* Stylesheet is loaded in the page head when a shortcode is used in the content; script is loaded deferred
+* Hardened JSON output, typed settings registration, multisite-aware uninstall
+
 = 2.0.4 =
 * Minimum PHP version raised to 8.3 (older PHP versions no longer receive security fixes)
 
@@ -113,6 +125,9 @@ No, this plugin is free and self-contained. There are no paid upgrades or premiu
 * Today marker and status badge rendered via JavaScript (caching-compatible), business time zone used instead of the visitor's local time
 
 == Upgrade Notice ==
+
+= 2.0.5 =
+Runs on PHP 7.4+ again and requires WordPress 6.6+. Supports hours past midnight, the site's 12/24-hour time format and fixes a hidden paragraph before shortcodes.
 
 = 2.0.4 =
 Requires PHP 8.3 or higher. Sites on older PHP versions keep the current version until PHP is updated.

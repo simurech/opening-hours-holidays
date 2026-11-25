@@ -2,9 +2,9 @@
 
 **Öffnungszeiten und Feiertags-Ausnahmen verwalten und per Shortcode anzeigen — inklusive schema.org-Daten fürs lokale SEO.**
 
-[![Stable Tag](https://img.shields.io/badge/stable-2.0.4-blue.svg)](https://github.com/simurech/opening-hours-holidays/releases)
-[![WordPress](https://img.shields.io/badge/WordPress-5.8%2B-21759b.svg)](https://wordpress.org/)
-[![PHP](https://img.shields.io/badge/PHP-8.3%2B-8892be.svg)](https://php.net/)
+[![Release](https://img.shields.io/github/v/release/simurech/opening-hours-holidays?label=stable)](https://github.com/simurech/opening-hours-holidays/releases)
+[![WordPress](https://img.shields.io/badge/WordPress-6.6%2B-21759b.svg)](https://wordpress.org/)
+[![PHP](https://img.shields.io/badge/PHP-7.4%2B-8892be.svg)](https://php.net/)
 [![Lizenz](https://img.shields.io/badge/Lizenz-GPL--2.0--or--later-green.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 
 > Öffnungszeiten und Feiertage einmal im Backend pflegen, per Shortcode überall auf der Website anzeigen — mit korrekter Zeitzonen-Behandlung, Cache-Kompatibilität und optionalen schema.org-Strukturdaten für lokale Suchmaschinen.
@@ -17,10 +17,11 @@ Ehemals bekannt als „Öffnungszeiten Plugin" — Einstellungen aus Version 1.x
 
 ## Funktionen
 
-- Reguläre Öffnungszeiten pro Wochentag (bis zu zwei Zeitfenster pro Tag)
+- Reguläre Öffnungszeiten pro Wochentag (bis zu zwei Zeitfenster pro Tag, auch über Mitternacht)
+- Zeitformat (12/24 h) und Wochenbeginn gemäss WordPress-Einstellungen
 - Feiertags-Ausnahmen: geschlossene Tage oder angepasste Zeiten für bestimmte Daten
 - Vier Shortcodes für unterschiedliche Layouts
-- „Jetzt geöffnet / Aktuell geschlossen"-Badge
+- „Jetzt geöffnet / Aktuell geschlossen"-Badge, aktualisiert sich live
 - Kompatibel mit Full-Page-Caching (LiteSpeed, WP Rocket etc.)
 - Korrekte Zeitzonen-Behandlung — auch für internationale Besucher
 - Optionale schema.org-LocalBusiness-Ausgabe (JSON-LD)
@@ -46,7 +47,7 @@ Legacy-Aliase: `[oeffnungszeiten]`, `[oeffnungszeiten_heute]`, `[oeffnungszeiten
 
 | Komponente | Minimum |
 |---|---|
-| WordPress | 5.8 |
+| WordPress | 6.6 |
 | PHP | 7.4 |
 
 ---

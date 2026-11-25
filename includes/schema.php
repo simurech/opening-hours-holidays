@@ -111,6 +111,7 @@ function ohhol_output_schema() {
      */
     $schema = apply_filters('ohhol_schema_data', $schema);
 
-    echo '<script type="application/ld+json">' . wp_json_encode($schema) . '</script>' . "\n";
+    // Slashes stay escaped and <, >, & are hex-encoded, so no value can close the script tag.
+    echo '<script type="application/ld+json">' . wp_json_encode($schema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
 }
 add_action('wp_head', 'ohhol_output_schema');

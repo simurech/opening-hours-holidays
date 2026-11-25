@@ -26,26 +26,89 @@ add_action('admin_menu', 'ohhol_admin_menu');
 /**
  * Register settings.
  */
-function ohhol_register_settings() {
-    register_setting('ohhol_settings', 'ohhol_hours', [
-        'sanitize_callback' => 'ohhol_sanitize_hours',
-    ]);
-    register_setting('ohhol_settings', 'ohhol_holidays', [
-        'sanitize_callback' => 'ohhol_sanitize_holidays',
-    ]);
-    register_setting('ohhol_settings', 'ohhol_options', [
-        'sanitize_callback' => 'ohhol_sanitize_options',
-    ]);
-    register_setting('ohhol_settings', 'ohhol_design', [
-        'sanitize_callback' => 'ohhol_sanitize_design',
-    ]);
+function ohhol_register_settings(): void {
+    $settings = [
+        'ohhol_hours'    => 'ohhol_sanitize_hours',
+        'ohhol_holidays' => 'ohhol_sanitize_holidays',
+        'ohhol_options'  => 'ohhol_sanitize_options',
+        'ohhol_design'   => 'ohhol_sanitize_design',
+    ];
+    foreach ($settings as $option => $callback) {
+        register_setting('ohhol_settings', $option, [
+            'type'              => 'array',
+            'default'           => [],
+            'show_in_rest'      => false,
+            'sanitize_callback' => $callback,
+        ]);
+    }
 }
 add_action('admin_init', 'ohhol_register_settings');
 
 /**
+ * Add a settings error once per request (sanitize callbacks can run twice
+ * when an option is created for the first time).
+ */
+function ohhol_add_settings_notice(string $code, string $message): void {
+    static $added = [];
+    if (isset($added[$code])) {
+        return;
+    }
+    $added[$code] = true;
+    add_settings_error('ohhol_settings', $code, $message, 'warning');
+}
+
+/**
+ * Weekdays ordered according to "Week Starts On" (Settings → General).
+ */
+function ohhol_get_weekdays_ordered(): array {
+    $weekdays = ohhol_get_weekdays();
+    $keys     = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    $start    = (int) get_option('start_of_week', 1);
+    $start    = ($start >= 0 && $start <= 6) ? $start : 1;
+
+    $ordered = [];
+    for ($i = 0; $i < 7; $i++) {
+        $key           = $keys[($start + $i) % 7];
+        $ordered[$key] = $weekdays[$key];
+    }
+    return $ordered;
+}
+
+/**
+ * Normalize two time windows.
+ *
+ * A window needs both times and must not start and end at the same time.
+ * A closing time earlier than the opening time means the window ends on the
+ * following day (e.g. 22:00 – 02:00). Incomplete windows are cleared and
+ * reported via $had_issue; a lone second window moves up to the first slot.
+ */
+function ohhol_normalize_windows(array $input, bool &$had_issue = false): array {
+    $windows = [];
+    foreach ([1, 2] as $n) {
+        $open  = ohhol_sanitize_time($input['open' . $n] ?? '');
+        $close = ohhol_sanitize_time($input['close' . $n] ?? '');
+        if ($open === '' && $close === '') {
+            continue;
+        }
+        if ($open === '' || $close === '' || $open === $close) {
+            $had_issue = true;
+            continue;
+        }
+        $windows[] = [$open, $close];
+    }
+
+    return [
+        'open1'  => $windows[0][0] ?? '',
+        'close1' => $windows[0][1] ?? '',
+        'open2'  => $windows[1][0] ?? '',
+        'close2' => $windows[1][1] ?? '',
+    ];
+}
+
+/**
  * Weekday keys in display order with translated labels.
  */
-function ohhol_get_weekdays() {
+function ohhol_get_weekdays(): array {
     return [
         'monday'    => __('Monday', 'opening-hours-holidays'),
         'tuesday'   => __('Tuesday', 'opening-hours-holidays'),
@@ -155,14 +218,16 @@ function ohhol_get_design() {
 function ohhol_sanitize_hours($input) {
     $input     = is_array($input) ? $input : [];
     $sanitized = [];
+    $had_issue = false;
     foreach (array_keys(ohhol_get_weekdays()) as $key) {
-        $sanitized[$key] = [
-            'open'   => isset($input[$key]['open']) ? 1 : 0,
-            'open1'  => ohhol_sanitize_time($input[$key]['open1'] ?? ''),
-            'close1' => ohhol_sanitize_time($input[$key]['close1'] ?? ''),
-            'open2'  => ohhol_sanitize_time($input[$key]['open2'] ?? ''),
-            'close2' => ohhol_sanitize_time($input[$key]['close2'] ?? ''),
-        ];
+        $day             = is_array($input[$key] ?? null) ? $input[$key] : [];
+        $sanitized[$key] = ['open' => isset($day['open']) ? 1 : 0] + ohhol_normalize_windows($day, $had_issue);
+    }
+    if ($had_issue) {
+        ohhol_add_settings_notice(
+            'ohhol_hours_incomplete',
+            __('Some opening hours were incomplete or started and ended at the same time and have been removed. Please check your weekly hours.', 'opening-hours-holidays')
+        );
     }
     return $sanitized;
 }
@@ -178,10 +243,14 @@ function ohhol_sanitize_holidays($input) {
         return [];
     }
 
-    $cutoff    = gmdate('Y-m-d', strtotime('-90 days', current_datetime()->getTimestamp()));
+    $cutoff    = wp_date('Y-m-d', time() - 90 * DAY_IN_SECONDS);
     $sanitized = [];
+    $had_issue = false;
 
     foreach ($input as $item) {
+        if (!is_array($item)) {
+            continue;
+        }
         $date = ohhol_sanitize_date($item['date'] ?? '');
         if ($date === '' || $date < $cutoff) {
             continue;
@@ -190,16 +259,24 @@ function ohhol_sanitize_holidays($input) {
             ? $item['status']
             : 'closed';
 
+        $windows = $status === 'modified'
+            ? ohhol_normalize_windows($item, $had_issue)
+            : ['open1' => '', 'close1' => '', 'open2' => '', 'close2' => ''];
+
         // Last entry for a date wins.
         $sanitized[$date] = [
             'date'   => $date,
             'status' => $status,
-            'open1'  => ohhol_sanitize_time($item['open1'] ?? ''),
-            'close1' => ohhol_sanitize_time($item['close1'] ?? ''),
-            'open2'  => ohhol_sanitize_time($item['open2'] ?? ''),
-            'close2' => ohhol_sanitize_time($item['close2'] ?? ''),
+        ] + $windows + [
             'note'   => sanitize_text_field($item['note'] ?? ''),
         ];
+    }
+
+    if ($had_issue) {
+        ohhol_add_settings_notice(
+            'ohhol_holidays_incomplete',
+            __('Some holiday hours were incomplete and have been removed. Please check your exceptions.', 'opening-hours-holidays')
+        );
     }
 
     ksort($sanitized);
@@ -244,9 +321,10 @@ function ohhol_sanitize_design($input) {
  * Sanitize a time string (HH:MM, 24h).
  */
 function ohhol_sanitize_time($time) {
-    $time = sanitize_text_field($time);
-    if (preg_match('/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/', $time)) {
-        return $time;
+    $time = sanitize_text_field((string) $time);
+    if (preg_match('/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/', $time, $m)) {
+        // Zero-pad so times compare correctly as strings ("09:00" < "10:00").
+        return sprintf('%02d:%s', (int) $m[1], $m[2]);
     }
     return '';
 }
@@ -314,7 +392,7 @@ function ohhol_settings_page() {
         return;
     }
 
-    $weekdays = ohhol_get_weekdays();
+    $weekdays = ohhol_get_weekdays_ordered();
     $hours    = ohhol_get_hours();
     $holidays = ohhol_get_holidays();
     $options  = ohhol_get_options();
@@ -323,11 +401,13 @@ function ohhol_settings_page() {
     ?>
     <div class="wrap">
         <h1><?php esc_html_e('Opening Hours', 'opening-hours-holidays'); ?></h1>
+        <?php settings_errors(); ?>
 
         <form method="post" action="options.php">
             <?php settings_fields('ohhol_settings'); ?>
 
             <h2><?php esc_html_e('Regular opening hours', 'opening-hours-holidays'); ?></h2>
+            <p class="description"><?php esc_html_e('Times are shown in the time format and week order configured under Settings → General. A closing time earlier than the opening time ends on the following day (e.g. 22:00 – 02:00).', 'opening-hours-holidays'); ?></p>
             <table class="widefat ohhol-hours-table">
                 <thead>
                     <tr>

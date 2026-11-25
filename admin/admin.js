@@ -53,11 +53,11 @@
             $(this).closest('tr').remove();
         });
 
-        // Disable time inputs for days marked as closed.
+        // Dim time inputs for days marked as closed (read-only, so the times are kept).
         $('.ohhol-open-toggle').on('change', function () {
             var cells = $('.ohhol-times-cell[data-day="' + $(this).data('day') + '"]');
-            cells.find('input').prop('disabled', !this.checked);
-            cells.css('opacity', this.checked ? 1 : 0.4);
+            cells.find('input').prop('readonly', !this.checked);
+            cells.toggleClass('ohhol-inactive', !this.checked);
         }).trigger('change');
 
         // Disable time inputs for holidays with status "closed".
@@ -65,8 +65,44 @@
             var $cell      = $(this).closest('tr').find('.ohhol-holiday-times');
             var isModified = $(this).val() === 'modified';
             $cell.find('input').prop('disabled', !isModified);
-            $cell.css('opacity', isModified ? 1 : 0.4);
+            $cell.toggleClass('ohhol-inactive', !isModified);
         });
         $('.ohhol-status-select').trigger('change');
+
+        // Validate a time window: both times needed, not identical; mark overnight windows.
+        function checkWindow($close) {
+            var name   = $close.attr('name') || '';
+            var $open  = $close.closest('tr').find('input[name="' + name.replace(/\[close(\d)\]$/, '[open$1]') + '"]');
+            var open   = $open.val();
+            var close  = $close.val();
+            var invalid = (open === '') !== (close === '') || (open !== '' && open === close);
+            var overnight = open !== '' && close !== '' && close < open;
+
+            $open.add($close).toggleClass('ohhol-invalid', invalid)
+                .attr('aria-invalid', invalid ? 'true' : null);
+
+            var $hint = $close.next('.ohhol-next-day');
+            if (overnight && !$hint.length) {
+                $hint = $('<span>', {
+                    'class': 'ohhol-next-day',
+                    title: i18n.nextDay || '',
+                    text: '+1'
+                });
+                $close.after($hint);
+            } else if (!overnight) {
+                $hint.remove();
+            }
+        }
+
+        $(document).on('change input', 'input.ohhol-time-input', function () {
+            var name = $(this).attr('name') || '';
+            var $close = /\[open\d\]$/.test(name)
+                ? $(this).closest('tr').find('input[name="' + name.replace(/\[open(\d)\]$/, '[close$1]') + '"]')
+                : $(this);
+            checkWindow($close);
+        });
+        $('input.ohhol-time-input[name$="[close1]"], input.ohhol-time-input[name$="[close2]"]').each(function () {
+            checkWindow($(this));
+        });
     });
 })(jQuery);

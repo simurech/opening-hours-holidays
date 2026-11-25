@@ -33,25 +33,16 @@
     border: 0;
 }
 
-/* Hide empty p tags wpautop leaves around shortcodes */
+/* Hide empty p tags wpautop leaves around shortcodes (never paragraphs with content) */
 .ohhol-week + p:empty,
 .ohhol-today + p:empty,
-.ohhol-holidays + p:empty {
+.ohhol-holidays + p:empty,
+.ohhol-compact + p:empty,
+p:empty:has(+ .ohhol-week),
+p:empty:has(+ .ohhol-today),
+p:empty:has(+ .ohhol-holidays),
+p:empty:has(+ .ohhol-compact) {
     display: none;
-    margin: 0;
-    padding: 0;
-    height: 0;
-    line-height: 0;
-}
-
-p:has(+ .ohhol-week),
-p:has(+ .ohhol-today),
-p:has(+ .ohhol-holidays) {
-    margin: 0;
-    padding: 0;
-    height: 0;
-    line-height: 0;
-    font-size: 0;
 }
 
 /* Weekly overview */

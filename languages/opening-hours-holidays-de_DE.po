@@ -5,6 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Opening Hours & Holidays 2.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/opening-hours-holidays\n"
+"POT-Creation-Date: 2026-11-25T11:04:44+00:00\n"
+"PO-Revision-Date: 2026-07-08T12:00:00+00:00\n"
 "Last-Translator: Pulacha Labs\n"
 "Language-Team: German\n"
 "Language: de_DE\n"
@@ -12,257 +14,358 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"POT-Creation-Date: 2026-07-08T09:58:58+00:00\n"
-"PO-Revision-Date: 2026-07-08T12:00:00+00:00\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: opening-hours-holidays\n"
 
 #. Plugin Name of the plugin
+#: opening-hours-holidays.php
 msgid "Opening Hours & Holidays"
 msgstr "Öffnungszeiten & Feiertage"
 
 #. Plugin URI of the plugin
-#. Author URI of the plugin
-msgid "https://pulacha-labs.ch/"
-msgstr "https://pulacha-labs.ch/"
+#: opening-hours-holidays.php
+msgid "https://pulacha-labs.ch/plugins/opening-hours/"
+msgstr "https://pulacha-labs.ch/plugins/opening-hours/"
 
 #. Description of the plugin
+#: opening-hours-holidays.php
 msgid "Manage regular opening hours and holiday exceptions, display them via shortcodes and add schema.org structured data for local SEO."
 msgstr "Verwalte reguläre Öffnungszeiten und Feiertags-Ausnahmen, zeige sie per Shortcode an und ergänze strukturierte schema.org-Daten für Local SEO."
 
 #. Author of the plugin
+#: opening-hours-holidays.php
 msgid "Pulacha Labs"
 msgstr "Pulacha Labs"
 
+#. Author URI of the plugin
+#: opening-hours-holidays.php
+msgid "https://pulacha-labs.ch/"
+msgstr "https://pulacha-labs.ch/"
+
+#: includes/settings.php:15 includes/settings.php:16 includes/settings.php:403
 msgid "Opening Hours"
 msgstr "Öffnungszeiten"
 
+#: includes/settings.php:113
 msgid "Monday"
 msgstr "Montag"
 
+#: includes/settings.php:114
 msgid "Tuesday"
 msgstr "Dienstag"
 
+#: includes/settings.php:115
 msgid "Wednesday"
 msgstr "Mittwoch"
 
+#: includes/settings.php:116
 msgid "Thursday"
 msgstr "Donnerstag"
 
+#: includes/settings.php:117
 msgid "Friday"
 msgstr "Freitag"
 
+#: includes/settings.php:118
 msgid "Saturday"
 msgstr "Samstag"
 
+#: includes/settings.php:119
 msgid "Sunday"
 msgstr "Sonntag"
 
+#: includes/settings.php:229
+msgid "Some opening hours were incomplete or started and ended at the same time and have been removed. Please check your weekly hours."
+msgstr "Einige Öffnungszeiten waren unvollständig oder begannen und endeten zur selben Zeit und wurden entfernt. Bitte die Wochenzeiten prüfen."
+
+#: includes/settings.php:278
+msgid "Some holiday hours were incomplete and have been removed. Please check your exceptions."
+msgstr "Einige Zeiten bei Feiertagen/Ausnahmen waren unvollständig und wurden entfernt. Bitte die Ausnahmen prüfen."
+
+#: includes/settings.php:360 includes/shortcodes.php:169
+#: includes/shortcodes.php:286 includes/shortcodes.php:341
+#: includes/shortcodes.php:419 includes/shortcodes.php:506
+#: opening-hours-holidays.php:40
 msgid "Closed"
 msgstr "Geschlossen"
 
+#: includes/settings.php:361 opening-hours-holidays.php:41
 msgid "Modified hours"
 msgstr "Geänderte Zeiten"
 
+#: includes/settings.php:377 opening-hours-holidays.php:42
 msgid "e.g. Public holiday"
 msgstr "z. B. Feiertag"
 
+#: includes/settings.php:381 opening-hours-holidays.php:43
 msgid "Remove entry"
 msgstr "Eintrag entfernen"
 
+#: includes/settings.php:409
 msgid "Regular opening hours"
 msgstr "Reguläre Öffnungszeiten"
 
+#: includes/settings.php:410
+msgid "Times are shown in the time format and week order configured under Settings → General. A closing time earlier than the opening time ends on the following day (e.g. 22:00 – 02:00)."
+msgstr "Zeiten werden im Zeitformat und mit dem Wochenbeginn aus Einstellungen → Allgemein angezeigt. Liegt die Schliesszeit vor der Öffnungszeit, endet das Zeitfenster am Folgetag (z. B. 22:00 – 02:00)."
+
+#: includes/settings.php:414
 msgid "Day"
 msgstr "Tag"
 
+#: includes/settings.php:415
 msgid "Open"
 msgstr "Offen"
 
+#: includes/settings.php:416
 msgid "Time window 1 (e.g. morning)"
 msgstr "Zeitfenster 1 (z. B. Vormittag)"
 
+#: includes/settings.php:417
 msgid "Time window 2 (e.g. afternoon)"
 msgstr "Zeitfenster 2 (z. B. Nachmittag)"
 
+#: includes/settings.php:455
 msgid "Leave empty if there is no break"
 msgstr "Leer lassen, falls keine Pause"
 
+#: includes/settings.php:462 includes/settings.php:651
 msgid "Holidays & exceptions"
 msgstr "Feiertage & Ausnahmen"
 
+#: includes/settings.php:463
 msgid "Public holidays, company holidays or deviating hours on specific dates. Entries more than 90 days in the past are removed automatically when saving."
 msgstr "Feiertage, Betriebsferien oder abweichende Zeiten für bestimmte Daten. Einträge, die mehr als 90 Tage zurückliegen, werden beim Speichern automatisch entfernt."
 
+#: includes/settings.php:468
 msgid "Date"
 msgstr "Datum"
 
+#: includes/settings.php:469
 msgid "Status"
 msgstr "Status"
 
+#: includes/settings.php:470
 msgid "Hours (if modified)"
 msgstr "Zeiten (falls geändert)"
 
+#: includes/settings.php:471
 msgid "Note"
 msgstr "Bemerkung"
 
+#: includes/settings.php:483
 msgid "Add entry"
 msgstr "Eintrag hinzufügen"
 
+#: includes/settings.php:486
 msgid "Options"
 msgstr "Optionen"
 
+#: includes/settings.php:489
 msgid "Show \"Open now\" status"
 msgstr "\"Jetzt geöffnet\"-Status anzeigen"
 
 #. translators: %s: shortcode name
+#: includes/settings.php:499
 #, php-format
 msgid "Show whether the business is currently open in the %s shortcode"
 msgstr "Im Shortcode %s anzeigen, ob gerade geöffnet ist"
 
+#: includes/settings.php:507
 msgid "Schema.org structured data"
 msgstr "Strukturierte Daten (schema.org)"
 
+#: includes/settings.php:514
 msgid "Add LocalBusiness structured data (JSON-LD) with your opening hours to every page — helps search engines display your hours"
 msgstr "LocalBusiness-Daten (JSON-LD) mit deinen Öffnungszeiten auf jeder Seite ausgeben – hilft Suchmaschinen, deine Öffnungszeiten anzuzeigen"
 
+#: includes/settings.php:517
 msgid "Business name"
 msgstr "Name des Geschäfts"
 
+#: includes/settings.php:525
 msgid "Leave empty to use the site title."
 msgstr "Leer lassen, um den Titel der Website zu verwenden."
 
+#: includes/settings.php:530
 msgid "Design"
 msgstr "Design"
 
+#: includes/settings.php:532
 msgid "Font and primary text color are inherited from your theme. The colors below can be customized."
 msgstr "Schriftart und primäre Textfarbe werden vom Theme übernommen. Die folgenden Farben können angepasst werden."
 
+#: includes/settings.php:535
 msgid "Text & table"
 msgstr "Text & Tabelle"
 
+#: includes/settings.php:538
 msgid "Muted text color"
 msgstr "Gedämpfte Textfarbe"
 
+#: includes/settings.php:542
 msgid "Used for times and secondary information (default: #666666)"
 msgstr "Für Uhrzeiten und Nebeninformationen (Standard: #666666)"
 
+#: includes/settings.php:546
 msgid "Faint text color"
 msgstr "Sehr gedämpfte Textfarbe"
 
+#: includes/settings.php:550
 msgid "Used for notes and additions in brackets (default: #999999)"
 msgstr "Für Bemerkungen und Klammerzusätze (Standard: #999999)"
 
+#: includes/settings.php:554
 msgid "Zebra stripes"
 msgstr "Zebra-Streifen"
 
+#: includes/settings.php:558
 msgid "Add a background color to odd rows"
 msgstr "Ungerade Zeilen farblich hinterlegen"
 
+#: includes/settings.php:563
 msgid "Zebra stripe color"
 msgstr "Zebra-Streifen-Farbe"
 
+#: includes/settings.php:571
 msgid "\"Today\" marker"
 msgstr "\"Heute\"-Marker"
 
+#: includes/settings.php:574
 msgid "Background color"
 msgstr "Hintergrundfarbe"
 
+#: includes/settings.php:581
 msgid "Text color"
 msgstr "Textfarbe"
 
+#: includes/settings.php:589
 msgid "Status colors"
 msgstr "Status-Farben"
 
+#: includes/settings.php:592
 msgid "\"Closed\" text color"
 msgstr "Textfarbe für \"Geschlossen\""
 
+#: includes/settings.php:599
 msgid "\"Open now\" badge"
 msgstr "Badge \"Jetzt geöffnet\""
 
+#: includes/settings.php:601 includes/settings.php:617
 msgid "Background"
 msgstr "Hintergrund"
 
+#: includes/settings.php:605 includes/settings.php:621
 msgid "Text"
 msgstr "Text"
 
+#: includes/settings.php:609 includes/settings.php:625
 msgid "Dot"
 msgstr "Punkt"
 
+#: includes/settings.php:615
 msgid "\"Currently closed\" badge"
 msgstr "Badge \"Aktuell geschlossen\""
 
+#: includes/settings.php:632
 msgid "Save settings"
 msgstr "Einstellungen speichern"
 
+#: includes/settings.php:637
 msgid "Shortcode reference"
 msgstr "Shortcode-Anleitung"
 
+#: includes/settings.php:639
 msgid "Weekly overview"
 msgstr "Wochenübersicht"
 
+#: includes/settings.php:641
 msgid "Shows a table with all weekdays and the regular opening hours. The current day is highlighted."
 msgstr "Zeigt eine Tabelle mit allen Wochentagen und den regulären Öffnungszeiten. Der heutige Tag wird hervorgehoben."
 
+#: includes/settings.php:643
 msgid "Optional title above the table"
 msgstr "Optionaler Titel über der Tabelle"
 
+#: includes/settings.php:644 includes/settings.php:658
 msgid "HTML tag for the title (default: h2)"
 msgstr "HTML-Tag für den Titel (Standard: h2)"
 
+#: includes/settings.php:647 includes/shortcodes.php:172
 msgid "Today"
 msgstr "Heute"
 
+#: includes/settings.php:649
 msgid "Shows only the current day. Holiday exceptions are applied automatically."
 msgstr "Zeigt nur den heutigen Tag. Feiertags-Ausnahmen werden automatisch berücksichtigt."
 
+#: includes/settings.php:653
 msgid "Shows upcoming holidays and exceptions."
 msgstr "Zeigt kommende Feiertage und Ausnahmen."
 
+#: includes/settings.php:655
 msgid "Only entries up to X days in the future (default: 30)"
 msgstr "Nur Einträge bis X Tage in der Zukunft (Standard: 30)"
 
+#: includes/settings.php:656
 msgid "Maximum number of entries (optional)"
 msgstr "Maximale Anzahl Einträge (optional)"
 
+#: includes/settings.php:657
 msgid "Optional title (only shown if there are entries)"
 msgstr "Optionaler Titel (nur sichtbar, wenn Einträge vorhanden sind)"
 
+#: includes/settings.php:661
 msgid "Compact overview (footer/sidebar)"
 msgstr "Kompakte Übersicht (Footer/Sidebar)"
 
+#: includes/settings.php:663
 msgid "Space-saving list. Consecutive days with identical hours are grouped automatically (e.g. \"Monday – Friday\")."
 msgstr "Platzsparende Liste. Aufeinanderfolgende Tage mit gleichen Zeiten werden automatisch zusammengefasst (z. B. \"Montag – Freitag\")."
 
+#: includes/settings.php:665
 msgid "Show the \"Open now / Currently closed\" badge"
 msgstr "Badge \"Jetzt geöffnet / Aktuell geschlossen\" anzeigen"
 
+#: includes/settings.php:666
 msgid "Optional title"
 msgstr "Optionaler Titel"
 
+#: includes/settings.php:667
 msgid "HTML tag for the title (default: h3)"
 msgstr "HTML-Tag für den Titel (Standard: h3)"
 
+#: includes/settings.php:671
 msgid "The legacy shortcodes [oeffnungszeiten], [oeffnungszeiten_heute], [oeffnungszeiten_spezial] and [oeffnungszeiten_kompakt] keep working as aliases."
 msgstr "Die bisherigen Shortcodes [oeffnungszeiten], [oeffnungszeiten_heute], [oeffnungszeiten_spezial] und [oeffnungszeiten_kompakt] funktionieren weiterhin als Aliase."
 
+#: includes/shortcodes.php:170
 msgid "Open now"
 msgstr "Jetzt geöffnet"
 
+#: includes/shortcodes.php:171
 msgid "Currently closed"
 msgstr "Aktuell geschlossen"
 
 #. translators: prefix shown before the regular hours when a holiday exception applies
+#: includes/shortcodes.php:174
 msgid "Regular:"
 msgstr "Regulär:"
 
+#: includes/shortcodes.php:274
 msgid "Weekly opening hours"
 msgstr "Wöchentliche Öffnungszeiten"
 
 #. translators: date format for holiday entries, see https://www.php.net/manual/datetime.format.php
+#: includes/shortcodes.php:396
 msgctxt "holiday date format"
 msgid "l, F j, Y"
 msgstr "l, j. F Y"
 
+#: includes/shortcodes.php:406
 msgid "Upcoming holidays and exceptions"
 msgstr "Kommende Feiertage und Ausnahmen"
+
+#: opening-hours-holidays.php:44
+msgid "Ends on the following day"
+msgstr "Endet am Folgetag"

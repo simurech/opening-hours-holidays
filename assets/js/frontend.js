@@ -1,5 +1,14 @@
+/**
+ * Opening Hours & Holidays – frontend.
+ *
+ * Everything that depends on the current date/time is rendered here so that
+ * full-page caching never shows stale information. The output is refreshed
+ * every minute while the page stays open.
+ */
 (function () {
-    const data = (typeof ohholData !== 'undefined') ? ohholData : {};
+    'use strict';
+
+    const data = (typeof window.ohholData !== 'undefined') ? window.ohholData : {};
     const i18n = data.i18n || {};
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
@@ -8,6 +17,9 @@
         'Wednesday': 'wednesday', 'Thursday': 'thursday',
         'Friday': 'friday', 'Saturday': 'saturday'
     };
+
+    // Original server-rendered content of weekly table cells (restored before each render).
+    const originalCells = new WeakMap();
 
     function getNow() {
         const now = new Date();
@@ -55,33 +67,37 @@
         return days[new Date(dateStr + 'T12:00:00Z').getUTCDay()];
     }
 
-    function formatHours(open1, close1, open2, close2) {
-        if (!open1 || !close1) return '';
-        let s = open1 + ' – ' + close1;
-        if (open2 && close2) s += ' / ' + open2 + ' – ' + close2;
-        return s;
-    }
-
-    function inWindow(time, open, close) {
-        return open && close && time >= open && time < close;
-    }
-
     function findHoliday(date) {
         return (data.holidays || []).find(e => e.date === date);
     }
 
-    function isOpenNow(now) {
-        const holiday = findHoliday(now.date);
+    /**
+     * Time windows [open, close] that start on the given date
+     * (holiday exception first, otherwise the regular weekday).
+     */
+    function windowsFor(date) {
+        const pairs   = src => [[src.open1, src.close1], [src.open2, src.close2]].filter(w => w[0] && w[1]);
+        const holiday = findHoliday(date);
         if (holiday) {
-            if (holiday.status === 'closed') return false;
-            return inWindow(now.time, holiday.open1, holiday.close1) ||
-                   inWindow(now.time, holiday.open2, holiday.close2);
+            return holiday.status === 'closed' ? [] : pairs(holiday);
         }
+        const day = (data.regular || {})[dayKeyOfDate(date)];
+        return (day && parseInt(day.open, 10)) ? pairs(day) : [];
+    }
 
-        const day = (data.regular || {})[now.dayKey];
-        if (!day || !parseInt(day.open, 10)) return false;
-        return inWindow(now.time, day.open1, day.close1) ||
-               inWindow(now.time, day.open2, day.close2);
+    function isOpenNow(now) {
+        const t = now.time;
+
+        // Windows starting today; a closing time <= opening time runs past midnight.
+        const today = windowsFor(now.date).some(([open, close]) =>
+            close > open ? (t >= open && t < close) : t >= open
+        );
+        if (today) return true;
+
+        // Overnight windows from yesterday that are still running.
+        return windowsFor(addDays(now.date, -1)).some(([open, close]) =>
+            close <= open && close !== '00:00' && t < close
+        );
     }
 
     // Build "<hours or Closed> (note)" content into an element.
@@ -103,11 +119,21 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const now = getNow();
-
-        // Weekly table: mark today's row.
+    function renderWeek(now) {
         document.querySelectorAll('.ohhol-week-table tr[data-day]').forEach(row => {
+            const cell = row.querySelector('.ohhol-day-hours');
+            if (!cell) return;
+
+            // Reset to the server-rendered state.
+            if (!originalCells.has(cell)) {
+                originalCells.set(cell, Array.from(cell.childNodes).map(n => n.cloneNode(true)));
+            }
+            cell.replaceChildren(...originalCells.get(cell).map(n => n.cloneNode(true)));
+            row.classList.remove('ohhol-today-row', 'ohhol-has-holiday');
+            row.removeAttribute('aria-current');
+            row.querySelectorAll('.ohhol-today-marker').forEach(m => m.remove());
+
+            // Today marker.
             if (row.dataset.day === now.dayKey) {
                 row.classList.add('ohhol-today-row');
                 row.setAttribute('aria-current', 'date');
@@ -121,7 +147,7 @@
             }
         });
 
-        // Weekly table: overlay holiday exceptions within the next 7 days.
+        // Overlay holiday exceptions within the next 7 days.
         (data.holidays || []).forEach(holiday => {
             const diff = (Date.parse(holiday.date + 'T12:00:00Z') - Date.parse(now.date + 'T12:00:00Z')) / 86400000;
             if (diff < 0 || diff >= 7) return;
@@ -131,15 +157,12 @@
                 if (!cell) return;
 
                 const regularText = cell.textContent.trim();
-                cell.innerHTML = '';
+                cell.replaceChildren();
                 row.classList.add('ohhol-has-holiday');
 
                 const holidayLine = document.createElement('div');
                 holidayLine.className = 'ohhol-holiday-line';
-                const hoursText = holiday.status === 'closed'
-                    ? ''
-                    : formatHours(holiday.open1, holiday.close1, holiday.open2, holiday.close2);
-                appendHoursContent(holidayLine, hoursText, holiday.note || '');
+                appendHoursContent(holidayLine, holiday.status === 'closed' ? '' : (holiday.text || ''), holiday.note || '');
                 cell.appendChild(holidayLine);
 
                 const regularLine = document.createElement('div');
@@ -148,8 +171,9 @@
                 cell.appendChild(regularLine);
             });
         });
+    }
 
-        // [opening_hours_today]: built entirely client-side — never shows a stale day.
+    function renderToday(now) {
         document.querySelectorAll('[data-ohhol-today]').forEach(container => {
             const weekdays = data.weekdays || {};
             const dayName  = weekdays[now.dayKey] || now.dayKey;
@@ -157,20 +181,18 @@
 
             let hoursText = '', note = '';
             if (holiday) {
-                hoursText = holiday.status === 'closed'
-                    ? ''
-                    : formatHours(holiday.open1, holiday.close1, holiday.open2, holiday.close2);
+                hoursText = holiday.status === 'closed' ? '' : (holiday.text || '');
                 note = holiday.note || '';
             } else {
                 const day = (data.regular || {})[now.dayKey];
                 if (day && parseInt(day.open, 10)) {
-                    hoursText = formatHours(day.open1, day.close1, day.open2, day.close2);
+                    hoursText = day.text || '';
                 }
             }
 
             // Keep the status badge, rebuild the rest.
             const statusBadge = container.querySelector('[data-ohhol-status]');
-            container.innerHTML = '';
+            container.replaceChildren();
 
             const dayEl = document.createElement('span');
             dayEl.className = 'ohhol-today-day';
@@ -201,8 +223,9 @@
                 container.appendChild(statusBadge);
             }
         });
+    }
 
-        // [opening_hours_holidays]: filter entries by the visitor's real date.
+    function renderHolidayLists(now) {
         document.querySelectorAll('[data-ohhol-holidays]').forEach(container => {
             const daysWindow = parseInt(container.dataset.days || '30', 10);
             const limit      = parseInt(container.dataset.limit || '-1', 10);
@@ -212,31 +235,59 @@
             container.querySelectorAll('tbody tr[data-date]').forEach(row => {
                 const d    = row.dataset.date;
                 const hide = d < now.date || d > maxDate || (limit > 0 && visible >= limit);
-                if (hide) {
-                    row.hidden = true;
-                } else {
-                    visible++;
-                }
+                row.hidden = hide;
+                if (!hide) visible++;
             });
 
-            if (visible === 0) container.hidden = true;
+            container.hidden = (visible === 0);
         });
+    }
 
-        // Today's holiday note in the compact status line.
+    function renderStatus(now) {
         const todayHoliday = findHoliday(now.date);
         document.querySelectorAll('[data-ohhol-today-note]').forEach(el => {
-            if (todayHoliday && todayHoliday.note) {
-                el.textContent = '(' + todayHoliday.note + ')';
-                el.hidden = false;
-            }
+            const note = todayHoliday && todayHoliday.note ? todayHoliday.note : '';
+            el.textContent = note ? '(' + note + ')' : '';
+            el.hidden = !note;
         });
 
-        // Status badges.
         const open = isOpenNow(now);
+        const text = open ? (i18n.openNow || 'Open now') : (i18n.closedNow || 'Currently closed');
         document.querySelectorAll('[data-ohhol-status]').forEach(badge => {
-            badge.textContent = open ? (i18n.openNow || 'Open now') : (i18n.closedNow || 'Currently closed');
-            badge.classList.remove('ohhol-open', 'ohhol-shut');
-            badge.classList.add(open ? 'ohhol-open' : 'ohhol-shut');
+            // Only touch the live region when something changed (avoids repeated announcements).
+            if (badge.textContent !== text) {
+                badge.textContent = text;
+            }
+            badge.classList.toggle('ohhol-open', open);
+            badge.classList.toggle('ohhol-shut', !open);
         });
-    });
+    }
+
+    let lastDate = null;
+
+    function render() {
+        const now = getNow();
+        if (now.date !== lastDate) {
+            lastDate = now.date;
+            renderWeek(now);
+            renderToday(now);
+            renderHolidayLists(now);
+        }
+        renderStatus(now);
+    }
+
+    function init() {
+        render();
+        // Refresh at the start of every minute.
+        setTimeout(() => {
+            render();
+            setInterval(render, 60000);
+        }, (60 - new Date().getSeconds()) * 1000 + 50);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 })();

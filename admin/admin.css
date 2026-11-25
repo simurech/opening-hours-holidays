@@ -104,3 +104,21 @@
     padding-left: 20px;
     list-style: disc;
 }
+
+.ohhol-inactive {
+    opacity: 0.4;
+}
+
+.ohhol-time-input.ohhol-invalid {
+    border-color: #d63638;
+    box-shadow: 0 0 0 1px #d63638;
+}
+
+.ohhol-next-day {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #2271b1;
+    cursor: help;
+}
