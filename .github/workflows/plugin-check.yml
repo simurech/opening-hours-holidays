@@ -13,5 +13,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Gepinnt auf den Commit, der die ungenutzte wp-env-Testumgebung deaktiviert
+      # (deren PHPUnit-Installation liess den Check fehlschlagen).
       - name: Run Plugin Check
-        uses: wordpress/plugin-check-action@v1
+        uses: wordpress/plugin-check-action@1d255c96b363ed3f29bd6af322a3394229032d42
+        with:
+          exclude-directories: |
+            .wordpress-org
+            vendor
+          exclude-files: |
+            composer.json
+            composer.lock
+            phpcs.xml.dist

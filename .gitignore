@@ -191,7 +191,7 @@ plugin-check-results/
 .php_cs.cache
 .php-cs-fixer.cache
 .phpcs-cache/
-phpcs.xml.dist
+phpcs.xml
 .phpunit.cache/
 
 # -----------------------------------------------------------------------------

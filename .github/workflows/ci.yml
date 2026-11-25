@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: PHP-Lint (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.3', '8.5']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: PHP einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: none
+
+      - name: Syntax prüfen
+        run: |
+          status=0
+          for f in $(git ls-files '*.php'); do
+            php -l "$f" || status=1
+          done
+          exit $status
+
+  phpcs:
+    name: PHPCS (Sicherheit, i18n, PHP-7.4-Kompatibilität)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: PHP einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+
+      - name: Abhängigkeiten installieren
+        run: composer install --no-progress --prefer-dist
+
+      - name: PHPCS ausführen
+        run: vendor/bin/phpcs
+
+  versions:
+    name: Versionsnummern konsistent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Header, Konstante und Stable tag vergleichen
+        run: |
+          HEADER=$(grep -m1 '^ \* Version:' opening-hours-holidays.php | sed 's/.*Version: *//')
+          CONSTANT=$(grep -m1 "define('OHHOL_VERSION'" opening-hours-holidays.php | sed "s/.*'\([0-9.]*\)'.*/\1/")
+          STABLE=$(grep -m1 '^Stable tag:' readme.txt | sed 's/Stable tag: *//')
+          echo "Header: $HEADER / Konstante: $CONSTANT / Stable tag: $STABLE"
+          if [ "$HEADER" != "$CONSTANT" ] || [ "$HEADER" != "$STABLE" ]; then
+            echo "::error::Versionsnummern stimmen nicht überein"
+            exit 1
+          fi
+          grep -q "^= $HEADER =" readme.txt || { echo "::error::Changelog-Eintrag für $HEADER fehlt in readme.txt"; exit 1; }
+          REQ_PHP_HEADER=$(grep -m1 '^ \* Requires PHP:' opening-hours-holidays.php | sed 's/.*Requires PHP: *//')
+          REQ_PHP_README=$(grep -m1 '^Requires PHP:' readme.txt | sed 's/Requires PHP: *//')
+          REQ_WP_HEADER=$(grep -m1 '^ \* Requires at least:' opening-hours-holidays.php | sed 's/.*Requires at least: *//')
+          REQ_WP_README=$(grep -m1 '^Requires at least:' readme.txt | sed 's/Requires at least: *//')
+          if [ "$REQ_PHP_HEADER" != "$REQ_PHP_README" ] || [ "$REQ_WP_HEADER" != "$REQ_WP_README" ]; then
+            echo "::error::Requires PHP / Requires at least weichen zwischen Header und readme.txt ab"
+            exit 1
+          fi

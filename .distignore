@@ -3,8 +3,14 @@
 .gitignore
 .distignore
 .claude
+.wordpress-org
+.wp-env.json
 CLAUDE.md
 README.md
+composer.json
+composer.lock
+phpcs.xml.dist
+vendor
 build
 *.zip
 .DS_Store
