@@ -145,22 +145,15 @@ function ohhol_parse_holiday_csv(string $content): array {
         }
     }
 
-    $handle = fopen('php://temp', 'r+');
-    if ($handle === false) {
-        return $result;
-    }
-    fwrite($handle, $content);
-    rewind($handle);
-
     $words  = ohhol_csv_words();
     $cutoff = wp_date('Y-m-d', time() - 90 * DAY_IN_SECONDS);
     $line   = 0;
 
-    while (($cols = fgetcsv($handle, 0, $delimiter, '"', '')) !== false) {
+    foreach (ohhol_csv_split_records($content) as $record) {
         $line++;
         $cols = array_map(static function ($v) {
             return trim((string) $v);
-        }, (array) $cols);
+        }, str_getcsv($record, $delimiter, '"', ''));
 
         if (implode('', $cols) === '') {
             continue;
@@ -233,9 +226,49 @@ function ohhol_parse_holiday_csv(string $content): array {
             'note'      => sanitize_text_field($cols[1] ?? ''),
         ];
     }
-    fclose($handle);
 
     return $result;
+}
+
+/**
+ * Split CSV content into records (newlines inside quoted fields are kept).
+ */
+function ohhol_csv_split_records(string $content): array {
+    $records  = [];
+    $current  = '';
+    $in_quote = false;
+    $length   = strlen($content);
+
+    for ($i = 0; $i < $length; $i++) {
+        $char = $content[$i];
+        if ($char === '"') {
+            $in_quote = !$in_quote;
+        }
+        if ($char === "\n" && !$in_quote) {
+            $records[] = $current;
+            $current   = '';
+            continue;
+        }
+        $current .= $char;
+    }
+    if ($current !== '') {
+        $records[] = $current;
+    }
+    return $records;
+}
+
+/**
+ * Build one CSV line (semicolon-separated, RFC 4180 quoting).
+ */
+function ohhol_csv_line(array $row): string {
+    $cells = array_map(static function ($value) {
+        $value = (string) $value;
+        if (preg_match('/[;"\r\n]/', $value)) {
+            $value = '"' . str_replace('"', '""', $value) . '"';
+        }
+        return $value;
+    }, $row);
+    return implode(';', $cells) . "\r\n";
 }
 
 /**
@@ -246,16 +279,12 @@ function ohhol_send_csv(string $filename, array $rows): void {
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="' . sanitize_file_name($filename) . '"');
 
-    $out = fopen('php://output', 'w');
-    if ($out === false) {
-        exit;
-    }
     // BOM so Excel opens UTF-8 correctly.
-    fwrite($out, "\xEF\xBB\xBF");
+    $csv = "\xEF\xBB\xBF";
     foreach ($rows as $row) {
-        fputcsv($out, $row, ';', '"', '');
+        $csv .= ohhol_csv_line($row);
     }
-    fclose($out);
+    echo $csv; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV download (text/csv), not HTML; formula cells are neutralized.
     exit;
 }
 
@@ -274,7 +303,7 @@ function ohhol_handle_csv_template(): void {
     check_admin_referer('ohhol_csv_template');
     $year = (int) wp_date('Y') + 1;
     ohhol_send_csv('opening-hours-holidays-template.csv', [
-        [__('Date', 'opening-hours-holidays'), __('Title', 'opening-hours-holidays')],
+        [__('Date', 'opening-hours-holidays'), _x('Title', 'CSV column', 'opening-hours-holidays')],
         [ohhol_csv_format_date($year . '-01-01'), __('New Year\'s Day', 'opening-hours-holidays')],
         [ohhol_csv_format_date($year . '-12-25'), __('Christmas Day', 'opening-hours-holidays')],
         [ohhol_csv_format_date($year . '-12-26'), __('Boxing Day', 'opening-hours-holidays')],
@@ -290,7 +319,7 @@ function ohhol_handle_csv_export(): void {
     check_admin_referer('ohhol_csv_export');
     $rows = [[
         __('Date', 'opening-hours-holidays'),
-        __('Title', 'opening-hours-holidays'),
+        _x('Title', 'CSV column', 'opening-hours-holidays'),
         __('To', 'opening-hours-holidays'),
         __('Status', 'opening-hours-holidays'),
         __('From 1', 'opening-hours-holidays'),
@@ -428,7 +457,7 @@ function ohhol_render_csv_section(): void {
                 <thead>
                     <tr>
                         <th><?php esc_html_e('Date', 'opening-hours-holidays'); ?></th>
-                        <th><?php esc_html_e('Title', 'opening-hours-holidays'); ?></th>
+                        <th><?php echo esc_html_x('Title', 'CSV column', 'opening-hours-holidays'); ?></th>
                         <th><?php esc_html_e('Status', 'opening-hours-holidays'); ?></th>
                         <th><?php esc_html_e('Every year', 'opening-hours-holidays'); ?></th>
                     </tr>

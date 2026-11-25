@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Opening Hours & Holidays 2.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/opening-hours-holidays\n"
-"POT-Creation-Date: 2026-11-25T11:19:38+00:00\n"
+"POT-Creation-Date: 2026-11-25T15:35:55+00:00\n"
 "PO-Revision-Date: 2026-07-08T12:00:00+00:00\n"
 "Last-Translator: Pulacha Labs\n"
 "Language-Team: German\n"
@@ -94,7 +94,7 @@ msgid "Date"
 msgstr "Datum"
 
 #: includes/csv.php:277 includes/csv.php:293 includes/csv.php:431
-#: blocks/opening-hours/index.js:39
+msgctxt "CSV column"
 msgid "Title"
 msgstr "Bezeichnung"
 
@@ -160,8 +160,8 @@ msgstr "Die Datei enthält keine Einträge."
 #, php-format
 msgid "%d entry imported."
 msgid_plural "%d entries imported."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d Eintrag importiert."
+msgstr[1] "%d Einträge importiert."
 
 #: includes/csv.php:409
 msgid "Import & export holidays (CSV)"
@@ -743,6 +743,10 @@ msgstr "Endet am Folgetag"
 msgid "View"
 msgstr "Ansicht"
 
+#: blocks/opening-hours/index.js:39
+msgid "Title"
+msgstr "Titel"
+
 #: blocks/opening-hours/index.js:46
 msgid "Title level"
 msgstr "Titel-Ebene"
@@ -759,7 +763,7 @@ msgstr "Maximale Anzahl Einträge (0 = alle)"
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: blocks/opening-hours/index.js:99
+#: blocks/opening-hours/index.js:101
 msgid "No upcoming holidays or exceptions."
 msgstr "Keine anstehenden Feiertage oder Ausnahmen."
 

@@ -94,6 +94,8 @@
                         el(ServerSideRender, {
                             block: 'ohhol/opening-hours',
                             attributes: a,
+                            // Colors/spacing are already applied by the editor wrapper.
+                            skipBlockSupportAttributes: true,
                             EmptyResponsePlaceholder: function () {
                                 return el('p', { className: 'ohhol-block-empty' },
                                     __('No upcoming holidays or exceptions.', 'opening-hours-holidays'));

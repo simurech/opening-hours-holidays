@@ -93,11 +93,11 @@ No, this plugin is free and self-contained. There are no paid upgrades or premiu
 
 == Screenshots ==
 
-1. Weekly table with today highlighted and an upcoming holiday shown inline
-2. Compact list for footers and sidebars with the live "Open now" badge
-3. Settings: regular hours with two time windows per day
-4. Holidays & exceptions with date ranges, yearly entries and CSV import
-5. The "Opening Hours" block with live preview in the block editor
+1. Weekly table with today highlighted, an upcoming holiday shown inline and the list of upcoming holidays incl. a date range
+2. Compact list for footers and sidebars with the live "Open now" badge and conditional content
+3. Settings: regular opening hours with two time windows per day
+4. Holidays & exceptions with date ranges and yearly entries, plus the CSV import preview
+5. The "Opening Hours" block with live preview and settings in the block editor
 
 == Changelog ==
 
